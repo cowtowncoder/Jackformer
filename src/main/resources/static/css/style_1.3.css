@@ -30,6 +30,27 @@ td {
   margin: 1px;
 }
 
+/* General row-level markers:
+ *  - hidden -> completely hidden
+ *  - shown -> shown except for prompt
+ *  - active -> all shown including prompt
+ */
+
+tr.hidden {
+  visibility: hidden;
+}
+
+tr.shown {
+  visibility: visible;
+}
+tr.shown td.prompt {
+  visibility: hidden;
+}
+
+tr.active {
+  visibility: visible;
+}
+
 /* Simple navigation menu for main-level tabs
  */
 
@@ -56,14 +77,6 @@ td {
 {
   color: #F0FFE0;
   background-color: #396;
-}
-
-.hidden {
-  visibility: hidden;
-}
-
-.shown {
-  visibility: visible;
 }
 
 .chosenTab

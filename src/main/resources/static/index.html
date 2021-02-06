@@ -4,10 +4,49 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
 <link rel='stylesheet' type='text/css' href='css/style_1.3.css'>
 <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-$("#input-format").change(function() {
-  alert( "Handler for .change() called." );
-});
+<script type='text/javascript'>
+  var currentInputFormat = "";
+  var currentOutputFormat = "";
+  var currentInputMode = "";
+
+function updateUIState() {
+  if (currentInputFormat) { // got valid input format choice
+    showRow($("#input-format-row"));
+    if (currentOutputFormat) { // got valid output format choice
+      showRow($("#output-format-row"));
+      if (currentInputMode) { // got valid input mode
+        showRow($("#input-mode-row"));
+        hideRow($("#input-row"));
+        hideRow($("#action-row"));
+      } else {
+        activateRow($("#input-mode-row"));
+        hideRow($("#input-row"));
+        hideRow($("#action-row"));
+      }
+    } else {
+      activateRow($("#output-format-row"));
+      hideRow($("#input-mode-row"));
+      hideRow($("#input-row"));
+      hideRow($("#action-row"));
+    }
+  } else { // no valid choice
+      activateRow($("#input-format-row"));
+      hideRow($("#output-format-row"));
+      hideRow($("#input-mode-row"));
+      hideRow($("#input-row"));
+      hideRow($("#action-row"));
+  }
+}
+
+function hideRow(row) {
+  row.removeClass("shown active").addClass("hidden");
+}
+function showRow(row) {
+  row.removeClass("hidden active").addClass("shown");
+}
+function activateRow(row) {
+  row.removeClass("hidden shown").addClass("active");
+}
 </script>
   </head>
   <body>
@@ -16,35 +55,69 @@ $("#input-format").change(function() {
 </div>
 <form>
  <table class="infoTable">
-  <tr class="infoRow"><td class="shown">Select:</td><td><label for="input-format">Input Format</label></td>
-<td><select id="input-format">
+  <tr id="input-format-row" class="infoRow active">
+<td class="prompt">Select:</td>
+<td class="label"><label for="input-format">Input Format</label></td>
+<td class="selector"><select id="input-format" size="1">
+   <option value=""></option>
    <option value="json">JSON</option>
    <option value="properties">Properties</option>
    <option value="xml">XML</option>
    <option value="yaml">YAML</option>
 </select></td>
    </tr>
-  <tr class="infoRow"><td class="hidden">Select:></td><td><label for="output-format">Output Format</label></td>
-<td><select id="output-format" class="hidden">
+  <tr id="output-format-row" class="infoRow hidden">
+<td class="prompt">Select:</td>
+<td class="label"><label for="output-format">Output Format</label></td>
+<td class="selector"><select id="output-format">
+   <option value=""></option>
    <option value="json">JSON</option>
    <option value="properties">Properties</option>
    <option value="xml">XML</option>
    <option value="yaml">YAML</option>
 </select></td>
    </tr>
-  <tr class="infoRow"><td class="hidden">Select></td><td>Input Mode</td>
-<td><select id="input-mode" class="hidden">
+  <tr id="input-mode-row" class="infoRow hidden">
+<td class="prompt">Select</td>
+<td class="label">Input Source</td>
+<td class="selector"><select id="input-mode" class="hidden">
+   <option value=""></option>
    <option value="input-text">Text</option>
    <option value="input-upload">Upload</option>
 </select></td>
    </tr>
-  <tr class="infoRow">
-   <td class="hidden" colspan="3">
+  <tr id="action-row" class="infoRow hidden">
+<td class="selector" colspan="3">
 <button type="button" id="button-show">Show Results</button>
 <button type="button" id="button-download">Download Results</button>
     </td>
    </tr>
  </table>
 </form>
+
+<script>
+$("#input-format").on("change", function() {
+  var inputFormat = $(this).val();
+  if (currentInputFormat != inputFormat) {
+    currentInputFormat = inputFormat;
+    updateUIState();
+  }
+});
+$("#output-format").on("change", function() {
+  var outputFormat = $(this).val();
+  if (currentOutputFormat != outputFormat) {
+    currentOutputFormat = outputFormat;
+    updateUIState();
+  }
+});
+$("#input-mode").on("change", function() {
+  var inputMode = $(this).val();
+  if (currentInputMode != inputMode) {
+    currentInputMode = inputMode;
+    updateUIState();
+  }
+});
+</script>
+
   </body>
 </html>
