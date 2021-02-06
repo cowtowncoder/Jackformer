@@ -8,34 +8,54 @@
   var currentInputFormat = "";
   var currentOutputFormat = "";
   var currentInputMode = "";
+  var currentInputFile = "";
+  var currentInputText = 0; // 0/1 for empty/non-empty
 
 function updateUIState() {
   if (currentInputFormat) { // got valid input format choice
     showRow($("#input-format-row"));
     if (currentOutputFormat) { // got valid output format choice
       showRow($("#output-format-row"));
-      if (currentInputMode) { // got valid input mode
-        showRow($("#input-mode-row"));
-        hideRow($("#input-row"));
-        hideRow($("#action-row"));
-      } else {
-        activateRow($("#input-mode-row"));
-        hideRow($("#input-row"));
+      var result = updateUIStateByInputMode();
+      if (result) { // got input content select!
+        activateRow("action");
+      } else { // no input mode
         hideRow($("#action-row"));
       }
     } else {
-      activateRow($("#output-format-row"));
+      activateRow("output-format");
       hideRow($("#input-mode-row"));
       hideRow($("#input-row"));
       hideRow($("#action-row"));
     }
   } else { // no valid choice
-      activateRow($("#input-format-row"));
+      activateRow("input-format");
       hideRow($("#output-format-row"));
       hideRow($("#input-mode-row"));
-      hideRow($("#input-row"));
+      hideRow($("#input-as-file-row"));
+      hideRow($("#input-as-text-row"));
       hideRow($("#action-row"));
   }
+}
+
+function updateUIStateByInputMode() {
+  if (currentInputMode == "input-mode-file") {
+    showRow($("#input-mode-row"));
+    activateRow("input-as-file");
+    hideRow($("#input-as-text-row"));
+    return currentInputFile;
+  }
+  if (currentInputMode == "input-mode-text") {
+    showRow($("#input-mode-row"));
+    hideRow($("#input-as-file-row"));
+    activateRow("input-as-text");
+    return currentInputText;
+  }
+  // No valid selection
+  activateRow("input-mode");
+  hideRow($("#input-as-file-row"));
+  hideRow($("#input-as-text-row"));
+  return false;
 }
 
 function hideRow(row) {
@@ -44,8 +64,10 @@ function hideRow(row) {
 function showRow(row) {
   row.removeClass("hidden active").addClass("shown");
 }
-function activateRow(row) {
-  row.removeClass("hidden shown").addClass("active");
+function activateRow(idBase) {
+  // activate row via class; put focus on selector
+  $("#"+idBase+"-row").removeClass("hidden shown").addClass("active");
+  $("#"+idBase).focus();
 }
 </script>
   </head>
@@ -56,8 +78,7 @@ function activateRow(row) {
 <form>
  <table class="infoTable">
   <tr id="input-format-row" class="infoRow active">
-<td class="prompt">Select:</td>
-<td class="label"><label for="input-format">Input Format</label></td>
+<td class="label"><span class="prompt">* </span><label for="input-format">Input Format</label></td>
 <td class="selector"><select id="input-format" size="1">
    <option value=""></option>
    <option value="json">JSON</option>
@@ -67,8 +88,7 @@ function activateRow(row) {
 </select></td>
    </tr>
   <tr id="output-format-row" class="infoRow hidden">
-<td class="prompt">Select:</td>
-<td class="label"><label for="output-format">Output Format</label></td>
+<td class="label"><span class="prompt">* </span><label for="output-format">Output Format</label></td>
 <td class="selector"><select id="output-format">
    <option value=""></option>
    <option value="json">JSON</option>
@@ -78,16 +98,24 @@ function activateRow(row) {
 </select></td>
    </tr>
   <tr id="input-mode-row" class="infoRow hidden">
-<td class="prompt">Select</td>
-<td class="label">Input Source</td>
-<td class="selector"><select id="input-mode" class="hidden">
+<td class="label"><span class="prompt">* </span>Input Source</td>
+<td class="selector"><select id="input-mode">
    <option value=""></option>
-   <option value="input-text">Text</option>
-   <option value="input-upload">Upload</option>
+   <option value="input-mode-text">Text</option>
+   <option value="input-mode-file">Upload</option>
 </select></td>
    </tr>
+  <tr id="input-as-file-row" class="infoRow hidden collapsed">
+<td class="label"><span class="prompt">* </span>Input File</td>
+<td class="selector"><input type="file" id="input-as-file"></input>
+   </tr>
+  <tr id="input-as-text-row" class="infoRow hidden collapsed">
+<td class="label"><span class="prompt">* </span>Input Content</td>
+<td class="selector"><textarea id="input-as-text" rows="12" cols="80"></textarea>
+   </tr>
   <tr id="action-row" class="infoRow hidden">
-<td class="selector" colspan="3">
+<td class="label"> </td>
+<td class="selector">
 <button type="button" id="button-show">Show Results</button>
 <button type="button" id="button-download">Download Results</button>
     </td>
@@ -117,6 +145,29 @@ $("#input-mode").on("change", function() {
     updateUIState();
   }
 });
+$("#input-as-file").on("change", function() {
+  var inputFile = $(this).val();
+  if (currentInputFile != inputFile) {
+    currentInputFile = inputFile;
+    updateUIState();
+  }
+});
+// Textareas are tricky. 'Change' only triggers on losing focus so need
+// to also do "keyup" it seems
+var inputAsText = $("#input-as-text");
+var inputAsTextFunc = function() {
+  var inputStr = $(this).val();
+  var inputText = Math.min(inputStr.length, 1);
+  if (currentInputText != inputText) {
+    currentInputText = inputText;
+    updateUIState();
+  }
+};
+inputAsText.on("change", inputAsTextFunc);
+inputAsText.on("keyup", inputAsTextFunc);
+
+// Finally, activate the input format selector directly:
+$("#input-format").focus();
 </script>
 
   </body>

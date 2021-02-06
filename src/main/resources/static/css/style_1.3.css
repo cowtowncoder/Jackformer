@@ -16,18 +16,22 @@ textarea {
 
 table {
   border-style: none;
-  padding: 1px;
-  margin: 1px;
-  outline-width: 0px;
+  padding: 2px;
+  margin: 2px;
+  outline-width: 2px;
 }
 
 tr {
-  padding: 1px;
-  margin: 1px;
+  padding: 2px;
+  margin: 2px;
 }
+
 td {
-  padding: 1px;
-  margin: 1px;
+  padding: 2px;
+  margin: 2px;
+  border-width: 1px;
+  border-color: #080;
+  border-style: solid; /* dotted? */
 }
 
 /* General row-level markers:
@@ -39,16 +43,23 @@ td {
 tr.hidden {
   visibility: hidden;
 }
+tr.hidden.collapsed {
+  visibility: collapse;
+}
 
 tr.shown {
   visibility: visible;
 }
-tr.shown td.prompt {
+tr.shown span.prompt {
   visibility: hidden;
 }
 
 tr.active {
   visibility: visible;
+}
+
+tr.active>td.label {
+  font-weight: bold;
 }
 
 /* Simple navigation menu for main-level tabs
@@ -116,111 +127,27 @@ a.id:active {  /* selected link */
 	color:#666;
 }
 
-.outputTable {
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-  border-collapse: collapse;
-  padding: 1px;
-  margin: 1px;
-  font-size: 14px;
-}
-
 .infoTable {
   border-style: solid;
   border-width: 2px;
   border-color: #060;
   border-collapse: collapse;
-  outline-width: 1px;
-  padding: 1px;
-  margin: 1px;
+  outline-width: 2px;
+  padding: 2px;
+  margin: 2px;
   font-size: 16px;
 }
 
-.infoRow {
-  padding: 1px;
-  border-width: 1px;
-  border-color: #080;
-  border-style: dotted;
-}
-
-.infoCell {
-  padding: 1px;
-  border-width: 1px;
-  border-color: #080;
-  border-style: dotted;
-}
-
-.dataRow {
-  /* Use full black for data */
-  color: black;
-  vertical-align:text-top;
-  text-align: right;
-}
-
-.dataHeader {
-  white-space: nowrap;
-  border-style: dotted;
-  border-width: 1px;
-  border-color: #003010;
-  text-align: center;
-}
-
-.idColumn {
+.outputTable {
   border-style: solid;
   border-width: 1px;
-  background-color: #F0FFE0;
+  border-color: black;
+  border-collapse: collapse;
+  padding: 4px;
+  margin: 4px;
+  font-size: 14px;
 }
 
-.totalCell {
-  white-space: nowrap;
-  text-align: center;
-  background-color: #F0F0F0;
-}
-
-/* Table cell used for log-like data; yellow bg (like totals); dotted cell separators */
-.logCell {
-  white-space: nowrap;
-  border-width: 1px;
-  border-style: dotted;
-  background-color: #F8F898;
-}
-
-/* table cell used for count/time/size costs estimates; no wrapping */
-.costGroup1 {
-  white-space: nowrap;
-  border-width: 1px 0px 1px 1px;
-  background-color: #FFFFB0;
-}
-.costGroup2 {
-  white-space: nowrap;
-  border-width: 1px 0px 1px 0px;
-  background-color: #F8F898;
-}
-.costGroup3 {
-  white-space: nowrap;
-  border-width: 1px 0px 1px 0px;
-  background-color: #F0F080;
-}
-.costGroup4 {
-  white-space: nowrap;
-  border-width: 1px 0px 1px 0px;
-  background-color: #E4E470;
-}
-
-.costTotal {
-  font-weight: bold;
-  white-space: nowrap;
-  border-width: 2px 0px 2px 1px;
-  color: #444;
-  background-color: #EEE;
-}
-
-.spamCost { /* Metric entry for non-empty spam count */
-  color: #C00;
-  font-weight: 600; /* between normal (400) and bold (700) */
-}
-	
 tr.dataRow > td {
   border-style: solid;
   border-width: 1px;
@@ -231,25 +158,6 @@ tr.dataRow > td {
 	
 .nowrap {
   white-space: nowrap;
-}
-
-.tableHeader {
-  width: 60px;
-  white-space: nowrap;
-/*  border-style: none;*/
-  text-decoration: underline;
-/*  background-color: #E8E8E8;
- */
-  color: #202020;
-}
-.tableHeaderPadding {
-  height: 6px;
-}
-.tableLookupCell {
-  width: 60px;
-  white-space: nowrap;
-  text-align: right;
-  vertical-align: middle;
 }
 
 .edgeTop {
