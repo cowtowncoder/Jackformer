@@ -16,18 +16,18 @@ textarea {
 
 table {
   border-style: none;
-  padding: 0px;
-  margin: 0px;
+  padding: 1px;
+  margin: 1px;
   outline-width: 0px;
 }
 
 tr {
-  padding: 0px;
-  margin: 0px;
+  padding: 1px;
+  margin: 1px;
 }
 td {
-  padding: 0px;
-  margin: 0px;
+  padding: 1px;
+  margin: 1px;
 }
 
 /* Simple navigation menu for main-level tabs
@@ -56,6 +56,14 @@ td {
 {
   color: #F0FFE0;
   background-color: #396;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.shown {
+  visibility: visible;
 }
 
 .chosenTab
