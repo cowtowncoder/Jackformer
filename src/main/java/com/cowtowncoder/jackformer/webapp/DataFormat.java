@@ -12,19 +12,21 @@ public enum DataFormat
 {
     // First textual
 
-    JSON("json"),
-    PROPERTIES("properties"),
-    XML("xml"),
-    YAML("yaml")
+    JSON("json", "JSON"),
+    PROPERTIES("properties", "Properties"),
+    XML("xml", "XML"),
+    YAML("yaml", "YAML")
 
     // then binary
 
     ;
 
     public final String id;
+    public final String desc;
 
-    private DataFormat(String n) {
+    private DataFormat(String n, String d) {
         id = n;
+        desc = d;
     }
 
     public static Map<String, DataFormat> mapping() {
@@ -44,5 +46,10 @@ public enum DataFormat
 
     public String id() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return desc;
     }
 }

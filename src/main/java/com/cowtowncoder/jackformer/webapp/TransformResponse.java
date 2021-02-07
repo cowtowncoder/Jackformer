@@ -35,4 +35,9 @@ public class TransformResponse
         return new TransformResponse(ErrorType.INVALID_PARAMETER,
                 String.format(errorTmpl, args));
     }
+
+    public static TransformResponse inputFail(String errorTmpl, Object... args) {
+        return new TransformResponse(ErrorType.INVALID_INPUT,
+                String.format(errorTmpl, args));
+    }
 }

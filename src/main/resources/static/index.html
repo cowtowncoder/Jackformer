@@ -77,6 +77,8 @@ function actionTransformAndShow() {
     outputFormat: $("#output-format").val(),
     inputContent: $("#input-as-text").val()
   };
+  // clean output first:
+  $("#output-content").val("");
   // $.getJSON is a fail, alas, wrt Content-Type missing etc so
   var result = $.ajax({
   	dataType : "json",
@@ -88,16 +90,22 @@ function actionTransformAndShow() {
 }
 
 function handleTransformResponseOk(resp) {
-  $("#output-status-message").val("OK");
-  $("#output-content").val(resp.transformed);
-  showRow("output-content");
-//  alert("Got OK response: "+JSON.stringify(resp));
+  // OK only means that call succeeded; not necessarily that the
+  // transformation did...
+  if (resp.ok) {
+    $("#output-status-message").text("OK");
+    $("#output-content").val(resp.transformed);
+    showRow("output-content");
+  } else {
+    $("#output-status-message").text("FAIL, type: "+resp.errorType+", message: "+resp.errorMessage);
+    hideRow("output-content");
+  }  
 }
 
 function handleTransformResponseFail(hdr, textStatus, errorString) {
-  $("#output-status-message").val("FAIL! "+textStatus);
+  $("#output-status-message").text("FAIL! Reason: "+textStatus);
   hideRow("output-content");
-  alert("Got FAIL response, status: "+textStatus+", error: "+errorString);
+//  alert("Got FAIL response, status: "+textStatus+", error: "+errorString);
 }
 
 </script>
@@ -163,7 +171,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
  <table class="outputTable">
   <tr id="output-status-row" class="shown">
 <td class="label">Status: </td>
-<td id="output-status-message"> </td>
+<td><span id="output-status-message"> </span></td>
   </tr>
   <tr id="output-content-row" class="hidden collapsed">
 <td class="label">Transformed Content: </td>
