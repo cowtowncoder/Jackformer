@@ -14,6 +14,11 @@ textarea {
   color: black;
 }
 
+textarea.outputText {
+  /* To fit more stuff, smaller font */
+  font-size: 14px;
+}
+
 table {
   border-style: none;
   padding: 2px;
@@ -24,14 +29,26 @@ table {
 tr {
   padding: 2px;
   margin: 2px;
+  border-width: 1px;
+  border-color: #080;
+  border-style: dotted;
 }
 
 td {
   padding: 2px;
   margin: 2px;
-  border-width: 1px;
+  border-width: 0px;
   border-color: #080;
-  border-style: solid; /* dotted? */
+}
+
+td.label {
+  width: 150px;
+}
+
+.button {
+  background-color: #80E060;
+  border: 2px solid #004000;
+  border-radius: 8px;
 }
 
 /* General row-level markers:
@@ -62,42 +79,6 @@ tr.active>td.label {
   font-weight: bold;
 }
 
-/* Simple navigation menu for main-level tabs
- */
-
-#navcontainer ul
-{
-  margin: 0;
-  padding: 0;
-  border: 1px;
-  list-style-type: none;
-  text-align: left;
-}
-
-#navcontainer ul li { display: inline; }
-
-#navcontainer ul li a
-{
-  text-decoration: none;
-  padding: .2em 1em;
-  color: #F0FFE0;
-  background-color: #063;
-}
-
-#navcontainer ul li a:hover
-{
-  color: #F0FFE0;
-  background-color: #396;
-}
-
-.chosenTab
-{
-  padding: .2em 1em;
-  color: #fff;
-  background-color: #396;
-  font-weight: bold;
-}	
-
 /* Need to make link colors fit with background, greenish shade
  */
 
@@ -127,7 +108,8 @@ a.id:active {  /* selected link */
 	color:#666;
 }
 
-.infoTable {
+.inputTable {
+  width: 800px;
   border-style: solid;
   border-width: 2px;
   border-color: #060;
@@ -139,13 +121,14 @@ a.id:active {  /* selected link */
 }
 
 .outputTable {
+  width: 800px;
   border-style: solid;
-  border-width: 1px;
+  border-width: 2px;
   border-color: black;
   border-collapse: collapse;
-  padding: 4px;
-  margin: 4px;
-  font-size: 14px;
+  padding: 2px;
+  margin: 2px;
+  font-size: 16px;
 }
 
 tr.dataRow > td {

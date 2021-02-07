@@ -13,72 +13,101 @@
 
 function updateUIState() {
   if (currentInputFormat) { // got valid input format choice
-    showRow($("#input-format-row"));
+    showRow("input-format");
     if (currentOutputFormat) { // got valid output format choice
-      showRow($("#output-format-row"));
+      showRow("output-format");
       var result = updateUIStateByInputMode();
       if (result) { // got input content select!
         activateRow("action");
       } else { // no input mode
-        hideRow($("#action-row"));
+        hideRow("action");
       }
     } else {
       activateRow("output-format");
-      hideRow($("#input-mode-row"));
-      hideRow($("#input-row"));
-      hideRow($("#action-row"));
+      hideRow("input-mode");
+      hideRow("input-as-file");
+      hideRow("input-as-text");
+      hideRow("action-row");
     }
   } else { // no valid choice
       activateRow("input-format");
-      hideRow($("#output-format-row"));
-      hideRow($("#input-mode-row"));
-      hideRow($("#input-as-file-row"));
-      hideRow($("#input-as-text-row"));
-      hideRow($("#action-row"));
+      hideRow("output-format");
+      hideRow("input-mode");
+      hideRow("input-as-file");
+      hideRow("input-as-text");
+      hideRow("action");
   }
 }
 
 function updateUIStateByInputMode() {
   if (currentInputMode == "input-mode-file") {
-    showRow($("#input-mode-row"));
+    showRow("input-mode");
     activateRow("input-as-file");
-    hideRow($("#input-as-text-row"));
+    hideRow("input-as-text");
     return currentInputFile;
   }
   if (currentInputMode == "input-mode-text") {
-    showRow($("#input-mode-row"));
-    hideRow($("#input-as-file-row"));
+    showRow("input-mode");
+    hideRow("input-as-file");
     activateRow("input-as-text");
     return currentInputText;
   }
   // No valid selection
   activateRow("input-mode");
-  hideRow($("#input-as-file-row"));
-  hideRow($("#input-as-text-row"));
+  hideRow("input-as-file");
+  hideRow("input-as-text");
   return false;
 }
 
-function hideRow(row) {
-  row.removeClass("shown active").addClass("hidden");
+function hideRow(rowId) {
+  $("#"+rowId+"-row").removeClass("shown active").addClass("hidden");
 }
-function showRow(row) {
-  row.removeClass("hidden active").addClass("shown");
+function showRow(rowId) {
+  $("#"+rowId+"-row").removeClass("hidden active").addClass("shown");
 }
 function activateRow(idBase) {
   // activate row via class; put focus on selector
   $("#"+idBase+"-row").removeClass("hidden shown").addClass("active");
   $("#"+idBase).focus();
 }
+
+function actionTransformAndShow() {
+  var input = {
+    inputFormat: $("#input-format").val(),
+    outputFormat: $("#output-format").val(),
+    inputContent: $("#input-as-text").val()
+  };
+  // $.getJSON is a fail, alas, wrt Content-Type missing etc so
+  var result = $.ajax({
+  	dataType : "json",
+  	url : "rest/jackform",
+  	data: input,
+  	success: handleTransformResponseOk,
+  	error: handleTransformResponseFail
+  });
+}
+
+function handleTransformResponseOk(resp) {
+  $("#output-status-message").val("OK");
+  $("#output-content").val(resp.transformed);
+  showRow("output-content");
+//  alert("Got OK response: "+JSON.stringify(resp));
+}
+
+function handleTransformResponseFail(hdr, textStatus, errorString) {
+  $("#output-status-message").val("FAIL! "+textStatus);
+  hideRow("output-content");
+  alert("Got FAIL response, status: "+textStatus+", error: "+errorString);
+}
+
 </script>
   </head>
   <body>
-    <h1>Jackformer</h1>
-<div>Are We Ready To Transform Things?!
-</div>
-<form>
- <table class="infoTable">
-  <tr id="input-format-row" class="infoRow active">
-<td class="label"><span class="prompt">* </span><label for="input-format">Input Format</label></td>
+    <h1>Jackformer - the Transformative Tool</h1>
+<form id="inputForm">
+ <table class="inputTable">
+  <tr id="input-format-row" class="active">
+<td class="label"><span class="prompt">* </span><label for="input-format">Input Format: </label></td>
 <td class="selector"><select id="input-format" size="1">
    <option value=""></option>
    <option value="json">JSON</option>
@@ -87,43 +116,64 @@ function activateRow(idBase) {
    <option value="yaml">YAML</option>
 </select></td>
    </tr>
-  <tr id="output-format-row" class="infoRow hidden">
-<td class="label"><span class="prompt">* </span><label for="output-format">Output Format</label></td>
+  <tr id="output-format-row" class="hidden">
+<td class="label"><span class="prompt">* </span><label for="output-format">Output Format: </label></td>
 <td class="selector"><select id="output-format">
    <option value=""></option>
    <option value="json">JSON</option>
+   <option value="json-pretty">JSON (pretty)</option>
    <option value="properties">Properties</option>
    <option value="xml">XML</option>
+   <option value="xml-pretty">XML (pretty)</option>
    <option value="yaml">YAML</option>
 </select></td>
    </tr>
-  <tr id="input-mode-row" class="infoRow hidden">
-<td class="label"><span class="prompt">* </span>Input Source</td>
+  <tr id="input-mode-row" class="hidden">
+<td class="label"><span class="prompt">* </span>Input Source: </td>
 <td class="selector"><select id="input-mode">
    <option value=""></option>
    <option value="input-mode-text">Text</option>
    <option value="input-mode-file">Upload</option>
 </select></td>
    </tr>
-  <tr id="input-as-file-row" class="infoRow hidden collapsed">
-<td class="label"><span class="prompt">* </span>Input File</td>
+  <tr id="input-as-file-row" class="hidden collapsed">
+<td class="label"><span class="prompt">* </span>Input File: </td>
 <td class="selector"><input type="file" id="input-as-file"></input>
    </tr>
   <tr id="input-as-text-row" class="infoRow hidden collapsed">
-<td class="label"><span class="prompt">* </span>Input Content</td>
+<td class="label"><span class="prompt">* </span>Input Content: </td>
 <td class="selector"><textarea id="input-as-text" rows="12" cols="80"></textarea>
    </tr>
-  <tr id="action-row" class="infoRow hidden">
+  <tr id="action-row" class="hidden">
 <td class="label"> </td>
 <td class="selector">
-<button type="button" id="button-show">Show Results</button>
-<button type="button" id="button-download">Download Results</button>
+<button type="button" class="button" id="button-show">Transform and Show</button>
+<button type="button" class="button" id="button-download">Transform and Download</button>
     </td>
    </tr>
  </table>
 </form>
 
+<p>
+<div height="50">
+</div>
+</p>
+
+<form id="outputForm">
+ <table class="outputTable">
+  <tr id="output-status-row" class="shown">
+<td class="label">Status: </td>
+<td id="output-status-message"> </td>
+  </tr>
+  <tr id="output-content-row" class="hidden collapsed">
+<td class="label">Transformed Content: </td>
+<td><textarea id="output-content" class="outputText" rows="12" cols="80"></textarea></td>
+  </tr>
+</table>  
+
 <script>
+
+// First: listeners for input control changes
 $("#input-format").on("change", function() {
   var inputFormat = $(this).val();
   if (currentInputFormat != inputFormat) {
@@ -165,6 +215,14 @@ var inputAsTextFunc = function() {
 };
 inputAsText.on("change", inputAsTextFunc);
 inputAsText.on("keyup", inputAsTextFunc);
+
+// Second: invoking transformations
+$("#button-show").click(function() {
+  actionTransformAndShow();
+});
+$("#button-download").click(function() {
+  // Not yet implemented
+});
 
 // Finally, activate the input format selector directly:
 $("#input-format").focus();
