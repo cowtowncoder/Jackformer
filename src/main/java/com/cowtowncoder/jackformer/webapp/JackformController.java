@@ -36,25 +36,26 @@ public class JackformController
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
             @RequestParam(value="inputContent", defaultValue="") String inputContent
     ) {
-        final boolean prettyOut = inputFormatId.endsWith(PRETTY_SUFFIX);
-        if (prettyOut) {
-            inputFormatId = inputFormatId.substring(0, inputFormatId.length() - PRETTY_SUFFIX.length());
-        }
         final DataFormat inputFormat = _formats.get(inputFormatId);
         if (inputFormat == null) {
             return TransformResponse.validationFail("Unrecognized input format \"%s\": only following known: [%s]",
                     inputFormatId, _knownFormatsDesc);
         }
+        final boolean prettyOut = outputFormatId.endsWith(PRETTY_SUFFIX);
+        if (prettyOut) {
+            outputFormatId = outputFormatId.substring(0, outputFormatId.length() - PRETTY_SUFFIX.length());
+        }
         final DataFormat outputFormat = _formats.get(outputFormatId);
         if (outputFormat == null) {
             return TransformResponse.validationFail("Unrecognized output format \"%s\": only following known: [%s]",
-                    inputFormatId, _knownFormatsDesc);
+                    outputFormatId, _knownFormatsDesc);
         }
-        JsonNode intermediate;
+        Object intermediate;
         ObjectMapper mapper = mapperFor(inputFormat);
 
         try {
             intermediate = mapper.readTree(inputContent);
+//            intermediate = mapper.readValue(inputContent, Object.class);
         } catch (Exception e) {
             return TransformResponse.inputFail(
 "Failed to parse input allegedly using format \"%s\"; problem: (%s) %s",
@@ -62,12 +63,17 @@ public class JackformController
         }
 
         mapper = mapperFor(outputFormat);
+        ObjectWriter w = mapper.writer();
+        if (prettyOut) {
+            w = w.withDefaultPrettyPrinter();
+        }
+        // and XML has bit of an oddity wrt wrapping
+        if (outputFormat == DataFormat.XML) {
+            w = w.withRootName("xml");
+        }
+
         String transformed;
         try {
-            ObjectWriter w = mapper.writer();
-            if (prettyOut) {
-                w = w.withDefaultPrettyPrinter();
-            }
             transformed = w.writeValueAsString(intermediate);
         } catch (Exception e) {
             return TransformResponse.inputFail(
