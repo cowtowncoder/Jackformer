@@ -3,11 +3,11 @@ package com.cowtowncoder.jackformer.webapp;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -28,10 +28,20 @@ public class JackformController
 
     private final String _knownFormatsDesc = DataFormat.knownFormatsAsString();
 
+    // Endpoint for form-data case needed with File upload
+    @PostMapping(value="/jackform-with-form",
+            produces = "application/json"
+    )
+    public TransformResponse jackItWithPost(
+    ) {
+        return TransformResponse.inputFail("Not Yet Implemented!");
+    }
+
+    // Endpoint for "simple" case without File upload
     @GetMapping(value="/jackform",
             produces = "application/json"
     )
-    public TransformResponse jackIt(
+    public TransformResponse jackItWithGet(
             @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
             @RequestParam(value="inputContent", defaultValue="") String inputContent

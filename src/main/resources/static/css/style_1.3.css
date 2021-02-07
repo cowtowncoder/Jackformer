@@ -21,7 +21,7 @@ textarea.outputText {
 
 table {
   border-style: none;
-  padding: 2px;
+  padding: 4px;
   margin: 2px;
   outline-width: 2px;
 }
@@ -45,12 +45,26 @@ td.label {
   width: 150px;
 }
 
+/* Some interactivity via https://www.w3schools.com/howto/howto_css_animate_buttons.asp */
 .button {
-  background-color: #80E060;
-  border: 2px solid #004000;
+  margin: 2px 2px 4px 2px;
+  padding: 3px;
+  background-color: #AE8;
+  border: 2px solid #040;
   border-radius: 8px;
+  box-shadow: 1px 4px #8A8;
+  cursor: pointer;
 }
 
+.button:hover {
+  background-color: #9D7;
+}
+
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 2px #565;
+  transform: translateY(2px);
+}
 /* General row-level markers:
  *  - hidden -> completely hidden
  *  - shown -> shown except for prompt
@@ -115,7 +129,7 @@ a.id:active {  /* selected link */
   border-color: #060;
   border-collapse: collapse;
   outline-width: 2px;
-  padding: 2px;
+  padding: 4px;
   margin: 2px;
   font-size: 16px;
 }
@@ -126,7 +140,7 @@ a.id:active {  /* selected link */
   border-width: 2px;
   border-color: black;
   border-collapse: collapse;
-  padding: 2px;
+  padding: 4px;
   margin: 2px;
   font-size: 16px;
 }

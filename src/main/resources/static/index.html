@@ -72,6 +72,35 @@ function activateRow(idBase) {
 }
 
 function actionTransformAndShow() {
+  // First: which mode is user expecting? Submission methods vary a lot
+  if (currentInputMode == "input-mode-file") {
+    actionTransformAndShowFile();
+  } else if (currentInputMode == "input-mode-text") {
+    actionTransformAndShowText();
+  } else {
+    alert("Jackformer is confused: unrecognized current input mode of: "+currentInputMode);
+  }
+}
+
+function actionTransformAndShowFile() {
+  // clean output first:
+  $("#output-content").val("");
+  // then try to submit
+  var formData = new FormData($("#form-input"));
+
+  $.ajax({
+        url: "rest/jackform-with-form",
+        type: "POST",
+        data: formData,
+        success: handleTransformResponseOk,
+        error: handleTransformResponseFail,
+        cache: false,
+        contentType: false,
+        processData: false
+  });
+}
+
+function actionTransformAndShowText() {
   var input = {
     inputFormat: $("#input-format").val(),
     outputFormat: $("#output-format").val(),
@@ -79,13 +108,15 @@ function actionTransformAndShow() {
   };
   // clean output first:
   $("#output-content").val("");
+  $("#output-status-message").text("Sending...");
   // $.getJSON is a fail, alas, wrt Content-Type missing etc so
   var result = $.ajax({
   	dataType : "json",
   	url : "rest/jackform",
   	data: input,
   	success: handleTransformResponseOk,
-  	error: handleTransformResponseFail
+  	error: handleTransformResponseFail,
+     cache: false
   });
 }
 
@@ -112,7 +143,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
   </head>
   <body>
     <h1>Jackformer - the Transformative Tool</h1>
-<form id="inputForm">
+<form id="form-input" method="post" enctype="multipart/form-data">
  <table class="inputTable">
   <tr id="input-format-row" class="active">
 <td class="label"><span class="prompt">* </span><label for="input-format">Input Format: </label></td>
@@ -225,13 +256,14 @@ inputAsText.on("change", inputAsTextFunc);
 inputAsText.on("keyup", inputAsTextFunc);
 
 // Second: invoking transformations
-$("#button-show").click(function() {
-  actionTransformAndShow();
-});
-$("#button-download").click(function() {
+$("#button-show").click(actionTransformAndShow);
+$("#button-download").click(function(evt) {
+//  actionTransformAndDownload();
   // Not yet implemented
 });
 
+// !!! TODO? Do we need to initialize Javascript value fields (saw an
+//  odd error)
 // Finally, activate the input format selector directly:
 $("#input-format").focus();
 </script>
