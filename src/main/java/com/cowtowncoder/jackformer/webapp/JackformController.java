@@ -2,11 +2,14 @@ package com.cowtowncoder.jackformer.webapp;
 
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -30,21 +33,29 @@ public class JackformController
 
     // Endpoint for form-data case needed with File upload
     @PostMapping(value="/jackform-with-form",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json"
     )
     public TransformResponse jackItWithPost(
+            @RequestPart(value="input-as-file", required=false) MultipartFile content
     ) {
-        return TransformResponse.inputFail("Not Yet Implemented!");
+        if (content == null) {
+            return TransformResponse.validationFail("Missing File input \"input-as-file\"");
+        }
+        long len = content.getSize();
+        return TransformResponse.inputFail("Got input: "+len+" bytes!");
     }
 
     // Endpoint for "simple" case without File upload
-    @GetMapping(value="/jackform",
+    @PostMapping(value="/jackform",
             produces = "application/json"
     )
-    public TransformResponse jackItWithGet(
+    public TransformResponse jackItWithParams(
             @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
-            @RequestParam(value="inputContent", defaultValue="") String inputContent
+            // May change to `String` for better debuggability, but byte[] more efficient
+            // and safer wrt character encoding
+            @RequestBody byte[] inputContent
     ) {
         final DataFormat inputFormat = _formats.get(inputFormatId);
         if (inputFormat == null) {

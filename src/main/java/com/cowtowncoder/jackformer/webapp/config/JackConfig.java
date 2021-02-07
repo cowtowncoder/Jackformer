@@ -12,8 +12,10 @@ public class JackConfig
         CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
         loggingFilter.setIncludeClientInfo(true);
         loggingFilter.setIncludeQueryString(true);
-        loggingFilter.setIncludePayload(false);
-        loggingFilter.setIncludeHeaders(false);
+//        loggingFilter.setIncludePayload(false);
+//        loggingFilter.setIncludeHeaders(false);
+        loggingFilter.setIncludePayload(true);
+        loggingFilter.setIncludeHeaders(true);
         return loggingFilter;
     }
 }

@@ -86,37 +86,47 @@ function actionTransformAndShowFile() {
   // clean output first:
   $("#output-content").val("");
   // then try to submit
-  var formData = new FormData($("#form-input"));
+  var formData = new FormData($("#form-input").get(0));
 
   $.ajax({
         url: "rest/jackform-with-form",
         type: "POST",
+        cache: false,
+        // Sending content as form data
+        contentType: "multipart/form-data",
         data: formData,
+        processData: true,
+        // Response is json
+        dataType : "json",
         success: handleTransformResponseOk,
         error: handleTransformResponseFail,
-        cache: false,
-        contentType: false,
-        processData: false
+//        contentType: false,
+//        processData: false
   });
 }
 
 function actionTransformAndShowText() {
-  var input = {
-    inputFormat: $("#input-format").val(),
-    outputFormat: $("#output-format").val(),
-    inputContent: $("#input-as-text").val()
-  };
+  var inputFormat = $("#input-format").val();
+  var outputFormat = $("#output-format").val();
+  var inputContent = $("#input-as-text").val();
+  var url = "rest/jackform?inputFormat="+inputFormat+"&outputFormat="+outputFormat;
+
   // clean output first:
   $("#output-content").val("");
   $("#output-status-message").text("Sending...");
   // $.getJSON is a fail, alas, wrt Content-Type missing etc so
   var result = $.ajax({
+  	url : url,
+  	type: "POST",
+     cache: false,
+  	// Sending json/xml/csv whatever; not to be processed, as payload;
+  	contentType: "application/octet-stream",
+  	data: inputContent,
+     processData: false,
+     // Response is json, however
   	dataType : "json",
-  	url : "rest/jackform",
-  	data: input,
   	success: handleTransformResponseOk,
-  	error: handleTransformResponseFail,
-     cache: false
+  	error: handleTransformResponseFail
   });
 }
 
