@@ -1,5 +1,6 @@
 package com.cowtowncoder.jackformer.webapp;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -13,19 +14,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 /**
- * Place where trans... I mean, JACKformations happen.
+ * Main controller for Jackformation activities.
  */
 @RestController
 @RequestMapping("/rest")
 public class JackformController
 {
     private final String PRETTY_SUFFIX = "-pretty";
+
+    // Limit input content to 10 megs for now
+    private final static long MAX_INPUT_LEN = 10L * 1024 * 1024;
 
     private final Map<String, DataFormat> _formats = DataFormat.mapping();
 
@@ -37,13 +37,27 @@ public class JackformController
             produces = "application/json"
     )
     public TransformResponse jackItWithPost(
-            @RequestPart(value="input-as-file", required=false) MultipartFile content
+            @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
+            @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
+            @RequestPart(value="inputContent", required=false) MultipartFile contentPart
     ) {
-        if (content == null) {
-            return TransformResponse.validationFail("Missing File input \"input-as-file\"");
+        long byteLen;
+        if ((contentPart == null) || (byteLen = contentPart.getSize()) <= 0L) {
+            return TransformResponse.validationFail("Missing File input \"inputContent\"");
         }
-        long len = content.getSize();
-        return TransformResponse.inputFail("Got input: "+len+" bytes!");
+        TransformResponse fail = _checkSize(byteLen);
+        if (fail != null) {
+            return fail;
+        }
+        byte[] inputContent;
+        try {
+            inputContent = contentPart.getBytes();
+        } catch (IOException e) {
+            return TransformResponse.inputFail(
+"Failed to read content (%s); problem: (%s) %s",
+                _bytesDesc(byteLen), e.getClass().getName(), e.getMessage());
+        }
+        return _jackform(inputFormatId, outputFormatId, inputContent);
     }
 
     // Endpoint for "simple" case without File upload
@@ -57,6 +71,16 @@ public class JackformController
             // and safer wrt character encoding
             @RequestBody byte[] inputContent
     ) {
+        TransformResponse fail = _checkSize(inputContent.length);
+        if (fail != null) {
+            return fail;
+        }
+        return _jackform(inputFormatId, outputFormatId, inputContent);
+    }
+
+    private TransformResponse _jackform(String inputFormatId, String outputFormatId,
+            byte[] inputContent)
+    {
         final DataFormat inputFormat = _formats.get(inputFormatId);
         if (inputFormat == null) {
             return TransformResponse.validationFail("Unrecognized input format \"%s\": only following known: [%s]",
@@ -72,7 +96,7 @@ public class JackformController
                     outputFormatId, _knownFormatsDesc);
         }
         Object intermediate;
-        ObjectMapper mapper = mapperFor(inputFormat);
+        ObjectMapper mapper = Jacksons.mapperFor(inputFormat);
 
         try {
             intermediate = mapper.readTree(inputContent);
@@ -83,11 +107,7 @@ public class JackformController
                     inputFormat, e.getClass().getName(), e.getMessage());
         }
 
-        mapper = mapperFor(outputFormat);
-        ObjectWriter w = mapper.writer();
-        if (prettyOut) {
-            w = w.withDefaultPrettyPrinter();
-        }
+        ObjectWriter w = Jacksons.writerFor(outputFormat, prettyOut);
         // and XML has bit of an oddity wrt wrapping
         if (outputFormat == DataFormat.XML) {
             w = w.withRootName("xml");
@@ -106,24 +126,25 @@ e.getClass().getName(), e.getMessage());
         return TransformResponse.success(transformed);
     }
 
-    private ObjectMapper mapperFor(DataFormat f) {
-        switch (f) {
-        case JSON:
-            return JSON_MAPPER;
-        case PROPERTIES:
-            return PROPERTIES_MAPPER;
-        case XML:
-            return XML_MAPPER;
-        case YAML:
-            return YAML_MAPPER;
-        default:
-            throw new IllegalArgumentException("Internal error: no ObjectMapper known for format "+f);
+    private TransformResponse _checkSize(long byteLen)
+    {
+        if (byteLen > MAX_INPUT_LEN) {
+            return TransformResponse.validationFail("Too big content (%s vs max %s)",
+                    _bytesDesc(byteLen),
+                    _bytesDesc(MAX_INPUT_LEN));
         }
+        return null;
     }
 
-    private final static ObjectMapper JSON_MAPPER = JsonMapper.builder().build();
-
-    private final static ObjectMapper PROPERTIES_MAPPER = JavaPropsMapper.builder().build();
-    private final static ObjectMapper XML_MAPPER = XmlMapper.builder().build();
-    private final static ObjectMapper YAML_MAPPER = YAMLMapper.builder().build();
+    private String _bytesDesc(long len) {
+        if (len < 2000L) {
+            return len+" bytes";
+        }
+        double kb = len / 1024.0;
+        if (kb < 1024) {
+            return String.format("%.1f KB", kb);
+        }
+        double mb = kb / 1024.0;
+        return String.format("%.1f MB", mb);
+    }
 }
