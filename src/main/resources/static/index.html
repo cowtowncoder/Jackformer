@@ -87,10 +87,6 @@ function actionTransformAndShow() {
   }
 }
 
-function actionTransformAndDownload() {
-  alert("Almost quite implemented!");
-}
-
 function actionTransformFromInputFile() {
   // clean output first:
   $("#output-content").val("");
@@ -168,7 +164,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
   <body>
     <h1>Jackformer - the Transformative Tool</h1>
 <table><tr><td>
-<form id="form-input" method="post" enctype="multipart/form-data"
+<form id="form-input" action="rest/jackform-output-file" method="post" enctype="multipart/form-data"
      target="output-content-frame">
   <table class="inputTable">
   <tr id="input-format-row" class="active">
@@ -306,9 +302,11 @@ var inputAsTextFunc = function() {
 inputAsText.on("change", inputAsTextFunc);
 inputAsText.on("keyup", inputAsTextFunc);
 
-// Second: invoking transformations
+// Second: invoking transformations: one is longer via ajax; another simplee submit
 $("#button-show").click(actionTransformAndShow);
-$("#button-download").click(actionTransformAndDownload);
+$("#button-download").click(function() {
+  $("#form-input").submit();
+});
 
 // !!! TODO? Do we need to initialize Javascript value fields (saw an
 //  odd error)

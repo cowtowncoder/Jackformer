@@ -1,9 +1,8 @@
 package com.cowtowncoder.jackformer.webapp;
 
-import java.io.IOException;
-import java.util.Map;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 /**
  * Main controller for Jackformation activities.
  */
@@ -22,16 +18,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 @RequestMapping("/rest")
 public class JackformController
 {
-    private final String PRETTY_SUFFIX = "-pretty";
-
     // Limit input content to 10 megs for now
     private final static long MAX_INPUT_LEN = 10L * 1024 * 1024;
 
-    private final Map<String, DataFormat> _formats = DataFormat.mapping();
-
-    private final String _knownFormatsDesc = DataFormat.knownFormatsAsString();
-
-    // Endpoint for form-data case needed with File upload
+    // Endpoint for case where content comes as Multi-part data (since it
+    // is from a file user selects), output as JSON Object
     @PostMapping(value="/jackform-input-file",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json"
@@ -39,112 +30,108 @@ public class JackformController
     public TransformResponse jackformWithInputFile(
             @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
-            @RequestPart(value="inputFile", required=false) MultipartFile contentPart
+            @RequestPart(value="inputFile", required=false) MultipartFile contentFile
     ) {
         long byteLen;
-        if ((contentPart == null) || (byteLen = contentPart.getSize()) <= 0L) {
+        if ((contentFile == null) || (byteLen = contentFile.getSize()) <= 0L) {
             return TransformResponse.validationFail("Missing File input \"inputContent\"");
         }
-        TransformResponse fail = _checkSize(byteLen);
-        if (fail != null) {
-            return fail;
+        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        String errorMsg;
+        if ((errorMsg = jack.checkFormats()) != null) {
+            return TransformResponse.validationFail(errorMsg);
         }
-        byte[] inputContent;
-        try {
-            inputContent = contentPart.getBytes();
-        } catch (IOException e) {
-            return TransformResponse.inputFail(
-"Failed to read content (%s); problem: (%s) %s",
-                _bytesDesc(byteLen), e.getClass().getName(), e.getMessage());
+        if ((errorMsg = jack.checkInput(contentFile, byteLen)) != null) {
+            return TransformResponse.inputFail(errorMsg);
         }
-        return _jackform(inputFormatId, outputFormatId, inputContent);
+        if ((errorMsg = jack.readContents()) != null) {
+            return TransformResponse.inputFail(errorMsg);
+        }
+        return jack.transformAsResponse();
     }
 
-    // Endpoint for "simple" case without File upload
+    // Endpoint for "simple" case where content comes as POST payload, output as
+    // JSON object
     @PostMapping(value="/jackform-input-text",
             produces = "application/json"
     )
-    public TransformResponse jackItWithParams(
+    public TransformResponse jackformWithInputText(
             @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
             // May change to `String` for better debuggability, but byte[] more efficient
             // and safer wrt character encoding
             @RequestBody byte[] inputContent
     ) {
-        TransformResponse fail = _checkSize(inputContent.length);
-        if (fail != null) {
-            return fail;
+        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        String errorMsg;
+        if ((errorMsg = jack.checkFormats()) != null) {
+            return TransformResponse.validationFail(errorMsg);
         }
-        return _jackform(inputFormatId, outputFormatId, inputContent);
+        if ((errorMsg = jack.checkInput(inputContent)) != null) {
+            return TransformResponse.inputFail(errorMsg);
+        }
+        if ((errorMsg = jack.readContents()) != null) {
+            return TransformResponse.inputFail(errorMsg);
+        }
+        return jack.transformAsResponse();
     }
 
-    private TransformResponse _jackform(String inputFormatId, String outputFormatId,
-            byte[] inputContent)
-    {
-        final DataFormat inputFormat = _formats.get(inputFormatId);
-        if (inputFormat == null) {
-            return TransformResponse.validationFail("Unrecognized input format \"%s\": only following known: [%s]",
-                    inputFormatId, _knownFormatsDesc);
-        }
-        final boolean prettyOut = outputFormatId.endsWith(PRETTY_SUFFIX);
-        if (prettyOut) {
-            outputFormatId = outputFormatId.substring(0, outputFormatId.length() - PRETTY_SUFFIX.length());
-        }
-        final DataFormat outputFormat = _formats.get(outputFormatId);
-        if (outputFormat == null) {
-            return TransformResponse.validationFail("Unrecognized output format \"%s\": only following known: [%s]",
-                    outputFormatId, _knownFormatsDesc);
-        }
-        Object intermediate;
-        ObjectMapper mapper = Jacksons.mapperFor(inputFormat);
+    // Endpoint for case where content comes as Multi-part data and result goes
+    // as binary content, so that user gets to save output into a file.
+    @PostMapping(value="/jackform-output-file",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = "application/octet-stream"
+    )
+    public ResponseEntity<byte[]> jackformWithRawOutput(
+            @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
+            @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
+            @RequestParam(value="inputMode", defaultValue="") String inputMode,
+            @RequestParam(value="inputText", defaultValue="") String contentText,
+            @RequestPart(value="inputFile", required=false) MultipartFile contentFile
+    ) {
+        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        String errorMsg;
 
-        try {
-            intermediate = mapper.readTree(inputContent);
-//            intermediate = mapper.readValue(inputContent, Object.class);
-        } catch (Exception e) {
-            return TransformResponse.inputFail(
-"Failed to parse input allegedly using format \"%s\"; problem: (%s) %s",
-                    inputFormat, e.getClass().getName(), e.getMessage());
+        if ((errorMsg = jack.checkFormats()) != null) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
+        }
+        String outputName;
+
+        switch (inputMode) {
+        case "input-mode-file":
+            {
+                long byteLen;
+                if ((contentFile == null) || (byteLen = contentFile.getSize()) <= 0L) {
+                    return ResponseEntity.status(HttpStatus.LENGTH_REQUIRED).build();
+                }
+                errorMsg = jack.checkInput(contentFile, byteLen);
+                String name = contentFile.getName();
+                int ix = name.lastIndexOf('.');
+                if (ix >= 0) {
+                    name = name.substring(ix);
+                } else if (name.isBlank()) {
+                    name = "content";
+                }
+                outputName = name + jack.outputFormat().suffix();
+            }
+            break;
+        case "input-mode-text":
+            if ((contentText == null) || contentText.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.LENGTH_REQUIRED).build();
+            }
+            errorMsg = jack.checkInput(contentText);
+            outputName = "content."+outputFormatId;
+            break;
+        default:
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
         }
 
-        ObjectWriter w = Jacksons.writerFor(outputFormat, prettyOut);
-        // and XML has bit of an oddity wrt wrapping
-        if (outputFormat == DataFormat.XML) {
-            w = w.withRootName("xml");
+        if (errorMsg != null) {
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).build();
         }
-
-        String transformed;
-        try {
-            transformed = w.writeValueAsString(intermediate);
-        } catch (Exception e) {
-            return TransformResponse.inputFail(
-"Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
-outputFormat, inputFormat,
-e.getClass().getName(), e.getMessage());
+        if ((errorMsg = jack.readContents()) != null) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
         }
-
-        return TransformResponse.success(transformed);
-    }
-
-    private TransformResponse _checkSize(long byteLen)
-    {
-        if (byteLen > MAX_INPUT_LEN) {
-            return TransformResponse.validationFail("Too big content (%s vs max %s)",
-                    _bytesDesc(byteLen),
-                    _bytesDesc(MAX_INPUT_LEN));
-        }
-        return null;
-    }
-
-    private String _bytesDesc(long len) {
-        if (len < 2000L) {
-            return len+" bytes";
-        }
-        double kb = len / 1024.0;
-        if (kb < 1024) {
-            return String.format("%.1f KB", kb);
-        }
-        double mb = kb / 1024.0;
-        return String.format("%.1f MB", mb);
+        return jack.transformAsEntity(outputName);
     }
 }

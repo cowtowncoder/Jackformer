@@ -132,7 +132,6 @@ a.id:active {  /* selected link */
   border-width: 2px;
   border-color: #060;
   border-collapse: collapse;
-  outline-width: 2px;
   padding: 4px;
   margin: 2px;
   font-size: 16px;

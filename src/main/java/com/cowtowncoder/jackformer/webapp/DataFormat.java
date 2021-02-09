@@ -52,6 +52,11 @@ public enum DataFormat
         return id;
     }
 
+    public String suffix() {
+        // For now, same as... id?
+        return "."+id;
+    }
+
     public boolean isBinaryFormat() {
         return isBinary;
     }

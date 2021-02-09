@@ -31,13 +31,11 @@ public class TransformResponse
         return new TransformResponse(content);
     }
 
-    public static TransformResponse validationFail(String errorTmpl, Object... args) {
-        return new TransformResponse(ErrorType.INVALID_PARAMETER,
-                String.format(errorTmpl, args));
+    public static TransformResponse validationFail(String errorMsg) {
+        return new TransformResponse(ErrorType.INVALID_PARAMETER, errorMsg);
     }
 
-    public static TransformResponse inputFail(String errorTmpl, Object... args) {
-        return new TransformResponse(ErrorType.INVALID_INPUT,
-                String.format(errorTmpl, args));
+    public static TransformResponse inputFail(String errorMsg) {
+        return new TransformResponse(ErrorType.INVALID_INPUT, errorMsg);
     }
 }
