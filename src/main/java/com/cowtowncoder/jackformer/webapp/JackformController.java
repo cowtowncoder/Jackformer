@@ -32,14 +32,14 @@ public class JackformController
     private final String _knownFormatsDesc = DataFormat.knownFormatsAsString();
 
     // Endpoint for form-data case needed with File upload
-    @PostMapping(value="/jackform-with-form",
+    @PostMapping(value="/jackform-input-file",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "application/json"
     )
-    public TransformResponse jackItWithPost(
+    public TransformResponse jackformWithInputFile(
             @RequestParam(value="inputFormat", defaultValue="") String inputFormatId,
             @RequestParam(value="outputFormat", defaultValue="") String outputFormatId,
-            @RequestPart(value="inputContent", required=false) MultipartFile contentPart
+            @RequestPart(value="inputFile", required=false) MultipartFile contentPart
     ) {
         long byteLen;
         if ((contentPart == null) || (byteLen = contentPart.getSize()) <= 0L) {
@@ -61,7 +61,7 @@ public class JackformController
     }
 
     // Endpoint for "simple" case without File upload
-    @PostMapping(value="/jackform",
+    @PostMapping(value="/jackform-input-text",
             produces = "application/json"
     )
     public TransformResponse jackItWithParams(

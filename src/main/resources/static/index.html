@@ -79,15 +79,19 @@ function activateRow(idBase) {
 function actionTransformAndShow() {
   // First: which mode is user expecting? Submission methods vary a lot
   if (currentInputMode == "input-mode-file") {
-    actionTransformAndShowFile();
+    actionTransformFromInputFile();
   } else if (currentInputMode == "input-mode-text") {
-    actionTransformAndShowText();
+    actionTransformFromInputText();
   } else {
     alert("Jackformer is confused: unrecognized current input mode of: "+currentInputMode);
   }
 }
 
-function actionTransformAndShowFile() {
+function actionTransformAndDownload() {
+  alert("Almost quite implemented!");
+}
+
+function actionTransformFromInputFile() {
   // clean output first:
   $("#output-content").val("");
   // then try to submit
@@ -95,7 +99,7 @@ function actionTransformAndShowFile() {
   var formData = new FormData(form[0]);
 
   $.ajax({
-        url: "rest/jackform-with-form",
+        url: "rest/jackform-input-file",
         type: "POST",
         cache: false,
         // Sending content as form data
@@ -115,11 +119,11 @@ function actionTransformAndShowFile() {
   });
 }
 
-function actionTransformAndShowText() {
+function actionTransformFromInputText() {
   var inputFormat = $("#input-format").val();
   var outputFormat = $("#output-format").val();
   var inputContent = $("#input-as-text").val();
-  var url = "rest/jackform?inputFormat="+inputFormat+"&outputFormat="+outputFormat;
+  var url = "rest/jackform-input-text?inputFormat="+inputFormat+"&outputFormat="+outputFormat;
 
   // clean output first:
   $("#output-content").val("");
@@ -164,7 +168,8 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
   <body>
     <h1>Jackformer - the Transformative Tool</h1>
 <table><tr><td>
-<form id="form-input" method="post" enctype="multipart/form-data">
+<form id="form-input" method="post" enctype="multipart/form-data"
+     target="output-content-frame">
   <table class="inputTable">
   <tr id="input-format-row" class="active">
 <td class="label"><span class="prompt">* </span><label for="input-format">Input Format: </label></td>
@@ -180,7 +185,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
    </tr>
   <tr id="output-format-row" class="hidden">
 <td class="label"><span class="prompt">* </span><label for="output-format">Output Format: </label></td>
-<td class="selector"><select id="output-format" name="outputFormat">
+<td class="selector"><select id="output-format" name="outputFormat" size="1">
    <option value=""></option>
    <option value="cbor">CBOR</option>
    <option value="json">JSON</option>
@@ -194,7 +199,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
    </tr>
   <tr id="input-mode-row" class="hidden">
 <td class="label"><span class="prompt">* </span>Input Source: </td>
-<td class="selector"><select id="input-mode">
+<td class="selector"><select id="input-mode" name="inputMode">
    <option value=""></option>
    <option value="input-mode-text">Text</option>
    <option value="input-mode-file">Upload</option>
@@ -202,11 +207,11 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
    </tr>
   <tr id="input-as-file-row" class="hidden collapsed">
 <td class="label"><span class="prompt">* </span>Input File: </td>
-<td class="selector"><input type="file" id="input-as-file" name="inputContent"></input>
+<td class="selector"><input type="file" id="input-as-file" name="inputFile"></input>
    </tr>
   <tr id="input-as-text-row" class="infoRow hidden collapsed">
 <td class="label"><span class="prompt">* </span>Input Content: </td>
-<td class="selector"><textarea id="input-as-text" rows="12" cols="80"></textarea>
+<td class="selector"><textarea id="input-as-text" name="inputText" rows="12" cols="80"></textarea>
    </tr>
   <tr id="action-row" class="hidden">
 <td class="label"> </td>
@@ -234,7 +239,11 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
 <td class="label">Transformed Content: </td>
 <td><textarea id="output-content" class="outputText" rows="12" cols="80"></textarea></td>
   </tr>
-</table>  
+ </table>  
+</form>
+
+<!-- iframe just as download target -->
+<iframe name="output-content-frame" style="display:none;"></iframe>
 
 <script>
 
@@ -299,10 +308,7 @@ inputAsText.on("keyup", inputAsTextFunc);
 
 // Second: invoking transformations
 $("#button-show").click(actionTransformAndShow);
-$("#button-download").click(function(evt) {
-//  actionTransformAndDownload();
-  // Not yet implemented
-});
+$("#button-download").click(actionTransformAndDownload);
 
 // !!! TODO? Do we need to initialize Javascript value fields (saw an
 //  odd error)
