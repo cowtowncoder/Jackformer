@@ -1,16 +1,16 @@
 package com.cowtowncoder.jackformer.webapp;
 
-public class TransformResponse
+public class TransformResponse<T>
 {
     public final boolean ok;
 
-    public final String transformed;
+    public final T transformed;
 
     public final ErrorType errorType;
     public final String errorMessage;
 
     // OK case:
-    protected TransformResponse(String result)
+    protected TransformResponse(T result)
     {
         ok = true;
         errorType = ErrorType.NONE;
@@ -24,18 +24,29 @@ public class TransformResponse
         ok = false;
         errorType = et;
         errorMessage = errorMsg;
-        transformed = "";
-    }
-    
-    public static TransformResponse success(String content) {
-        return new TransformResponse(content);
+        transformed = null;
     }
 
-    public static TransformResponse validationFail(String errorMsg) {
-        return new TransformResponse(ErrorType.INVALID_PARAMETER, errorMsg);
+    public static TransformResponse<String> success(String content) {
+        return new TransformResponse<>(content);
     }
 
-    public static TransformResponse inputFail(String errorMsg) {
-        return new TransformResponse(ErrorType.INVALID_INPUT, errorMsg);
+    public static TransformResponse<byte[]> success(byte[] content) {
+        return new TransformResponse<>(content);
+    }
+
+    public static <T> TransformResponse<T> validationFail(String errorMsg, Object... args) {
+        return new TransformResponse<T>(ErrorType.INVALID_PARAMETER,
+                String.format(errorMsg, args));
+    }
+
+    public static <T> TransformResponse<T> inputFail(String errorMsg, Object... args) {
+        return new TransformResponse<T>(ErrorType.INVALID_INPUT,
+                String.format(errorMsg, args));
+    }
+
+    public static <T> TransformResponse<T> transformationFail(String errorMsg, Object... args) {
+        return new TransformResponse<T>(ErrorType.TRANSFORMATION_FAILED,
+                String.format(errorMsg, args));
     }
 }

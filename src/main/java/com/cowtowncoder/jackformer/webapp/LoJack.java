@@ -3,9 +3,6 @@ package com.cowtowncoder.jackformer.webapp;
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,43 +52,43 @@ class LoJack
     public DataFormat inputFormat() { return _inputFormat; }
     public DataFormat outputFormat() { return _outputFormat; }
 
-    public String checkFormats() {
+    public <T> TransformResponse<T> checkFormats() {
         if (_inputFormat == null) {
-            return String.format("Unrecognized input format \"%s\": only following known: [%s]",
+            return TransformResponse.validationFail("Unrecognized input format \"%s\": only following known: [%s]",
                     _inputFormatId, _knownFormatsDesc);
         }
         if (_outputFormat == null) {
-            return String.format("Unrecognized output format \"%s\": only following known: [%s]",
+            return TransformResponse.validationFail("Unrecognized output format \"%s\": only following known: [%s]",
                     _outputFormatId, _knownFormatsDesc);
         }
         return null;
     }
 
-    public String checkInput(byte[] input) {
+    public <T> TransformResponse<T> checkInput(byte[] input) {
         _inputBytes = input;
         return _checkSize(input.length);
     }
 
-    public String checkInput(String input) {
+    public <T> TransformResponse<T> checkInput(String input) {
         _inputString = input;
         return _checkSize(input.length());
     }
 
-    public String checkInput(MultipartFile input, long contentLen) {
-        String msg = _checkSize(contentLen);
-        if (msg != null) {
-            return msg;
-        }
-        try {
-            _inputBytes = input.getBytes();
-        } catch (IOException e) {
-            return String.format("Failed to read content (%s); problem: (%s) %s",
-                    _bytesDesc(contentLen), e.getClass().getName(), e.getMessage());
+    public <T> TransformResponse<T> checkInput(MultipartFile input, long contentLen) {
+        TransformResponse<T> resp = _checkSize(contentLen);
+        if (resp == null) {
+            try {
+                _inputBytes = input.getBytes();
+            } catch (IOException e) {
+                resp = TransformResponse.inputFail(
+                        "Failed to read content (%s); problem: (%s) %s",
+                        _bytesDesc(contentLen), e.getClass().getName(), e.getMessage());
+            }
         }
         return null;
     }
 
-    public String readContents() {
+    public <T> TransformResponse<T> readContents() {
         try {
             final ObjectMapper mapper = Jacksons.mapperFor(_inputFormat);
             if (_inputBytes != null) {
@@ -101,32 +98,31 @@ class LoJack
             }
             return null;
         } catch (Exception e) {
-            return String.format(
+            return TransformResponse.inputFail(
 "Failed to parse input allegedly using format \"%s\"; problem: (%s) %s",
                     _inputFormat, e.getClass().getName(), e.getMessage());
         }
-        
     }
 
-    public TransformResponse transformAsResponse() {
+    public TransformResponse<String> transformAsStringResponse() {
         try {
             return TransformResponse.success(_writer().writeValueAsString(_intemediate));
         } catch (Exception e) {
-            return TransformResponse.inputFail(String.format(
+            return TransformResponse.transformationFail(String.format(
 "Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
 _outputFormat, _inputFormat,
 e.getClass().getName(), e.getMessage()));
         }
     }
 
-    public ResponseEntity<byte[]> transformAsEntity(String filename) {
+    public TransformResponse<byte[]> transformAsByteResponse() {
         try {
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename="+filename)
-                    .body(_writer().writeValueAsBytes(_intemediate));
+            return TransformResponse.success(_writer().writeValueAsBytes(_intemediate));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return TransformResponse.transformationFail(String.format(
+"Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
+_outputFormat, _inputFormat,
+e.getClass().getName(), e.getMessage()));
         }
     }
 
@@ -139,10 +135,10 @@ e.getClass().getName(), e.getMessage()));
         return w;
     }
 
-    private String _checkSize(long byteLen)
+    private <T> TransformResponse<T> _checkSize(long byteLen)
     {
         if (byteLen > _maxInputLength) {
-            return String.format("Too big content (%s vs max %s)",
+            return TransformResponse.inputFail("Too big content (%s vs max %s)",
                     _bytesDesc(byteLen),
                     _bytesDesc(_maxInputLength));
         }

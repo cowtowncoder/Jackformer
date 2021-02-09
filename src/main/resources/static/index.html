@@ -239,7 +239,14 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
 </form>
 
 <!-- iframe just as download target -->
-<iframe name="output-content-frame" style="display:none;"></iframe>
+<iframe id="output-content-frame" name="output-content-frame" width="800" height="80"
+ style="border:dotted 1px red" frameborder="0"
+></iframe>
+
+<!-- iframe name="output-content-frame" style="display:none;"></iframe 
+onload="javascript: alert('iFrame here, hello!');">
+
+-->
 
 <script>
 
