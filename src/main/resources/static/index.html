@@ -2,7 +2,7 @@
 <html lang="en">
   <head><title>Jackformer!</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
-<link rel='stylesheet' type='text/css' href='css/style_1.3.css'>
+<link rel='stylesheet' type='text/css' href='css/style_2021_02_08.css'>
 <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type='text/javascript'>
   var currentInputFormat = "";
@@ -10,6 +10,8 @@
   var currentInputMode = "";
   var currentInputFile = "";
   var currentInputText = 0; // 0/1 for empty/non-empty
+  var binaryInput = false;
+  var binaryOutput = false;
 
 function updateUIState() {
   if (currentInputFormat) { // got valid input format choice
@@ -59,6 +61,9 @@ function updateUIStateByInputMode() {
   return false;
 }
 
+function isBinary(formatId) {
+  return formatId == "smile" || formatId == "cbor";
+}
 function hideRow(rowId) {
   $("#"+rowId+"-row").removeClass("shown active").addClass("hidden");
 }
@@ -165,8 +170,10 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
 <td class="label"><span class="prompt">* </span><label for="input-format">Input Format: </label></td>
 <td class="selector"><select id="input-format" name="inputFormat" size="1">
    <option value=""></option>
+   <option value="cbor">CBOR</option>
    <option value="json">JSON</option>
    <option value="properties">Properties</option>
+   <option value="smile">Smile</option>
    <option value="xml">XML</option>
    <option value="yaml">YAML</option>
 </select></td>
@@ -175,9 +182,11 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
 <td class="label"><span class="prompt">* </span><label for="output-format">Output Format: </label></td>
 <td class="selector"><select id="output-format" name="outputFormat">
    <option value=""></option>
+   <option value="cbor">CBOR</option>
    <option value="json">JSON</option>
    <option value="json-pretty">JSON (pretty)</option>
    <option value="properties">Properties</option>
+   <option value="smile">Smile</option>
    <option value="xml">XML</option>
    <option value="xml-pretty">XML (pretty)</option>
    <option value="yaml">YAML</option>
@@ -234,6 +243,15 @@ $("#input-format").on("change", function() {
   var inputFormat = $(this).val();
   if (currentInputFormat != inputFormat) {
     currentInputFormat = inputFormat;
+    // Otherwise simple but need to disable text-input for binary input
+    binaryInput = isBinary(inputFormat);
+    if (binaryInput) {
+      $("#input-mode").val("input-mode-file").prop("disabled", true);
+      // will not fire event so update directly:
+      currentInputMode = "input-mode-file";
+    } else {
+      $("#input-mode").prop("disabled", false);
+    }
     updateUIState();
   }
 });
@@ -241,6 +259,13 @@ $("#output-format").on("change", function() {
   var outputFormat = $(this).val();
   if (currentOutputFormat != outputFormat) {
     currentOutputFormat = outputFormat;
+    // Otherwise simple but need to disable "transform & show" option
+    binaryOutput = isBinary(outputFormat);
+    if (binaryOutput) {
+      $("#button-show").addClass("hidden");
+    } else {
+      $("#button-show").removeClass("hidden");
+    }
     updateUIState();
   }
 });

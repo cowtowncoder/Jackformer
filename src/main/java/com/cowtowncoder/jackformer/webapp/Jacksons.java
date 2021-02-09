@@ -3,7 +3,9 @@ package com.cowtowncoder.jackformer.webapp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import com.fasterxml.jackson.dataformat.smile.databind.SmileMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
@@ -24,10 +26,14 @@ public final class Jacksons
     public static ObjectMapper mapperFor(DataFormat f)
     {
         switch (f) {
+        case CBOR:
+            return CBORWrapper.mapper();
         case JSON:
             return JSON_MAPPER;
         case PROPERTIES:
             return PropertiesWrapper.mapper();
+        case SMILE:
+            return SmileWrapper.mapper();
         case XML:
             return XmlWrapper.mapper();
         case YAML:
@@ -37,8 +43,20 @@ public final class Jacksons
         }
     }
 
+    static class CBORWrapper {
+        private final static ObjectMapper wrapped = CBORMapper.builder().build();
+
+        public static ObjectMapper mapper() { return wrapped; }
+    }
+
     static class PropertiesWrapper {
         private final static ObjectMapper wrapped = JavaPropsMapper.builder().build();
+
+        public static ObjectMapper mapper() { return wrapped; }
+    }
+
+    static class SmileWrapper {
+        private final static ObjectMapper wrapped = SmileMapper.builder().build();
 
         public static ObjectMapper mapper() { return wrapped; }
     }

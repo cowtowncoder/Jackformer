@@ -93,6 +93,10 @@ tr.active>td.label {
   font-weight: bold;
 }
 
+button.hidden {
+  visibility: hidden;
+}
+
 /* Need to make link colors fit with background, greenish shade
  */
 

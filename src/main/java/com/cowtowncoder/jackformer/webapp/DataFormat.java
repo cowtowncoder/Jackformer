@@ -12,21 +12,25 @@ public enum DataFormat
 {
     // First textual
 
-    JSON("json", "JSON"),
-    PROPERTIES("properties", "Properties"),
-    XML("xml", "XML"),
-    YAML("yaml", "YAML")
+    JSON("json", "JSON", false),
+    PROPERTIES("properties", "Properties", false),
+    XML("xml", "XML", false),
+    YAML("yaml", "YAML", false),
 
     // then binary
+    CBOR("cbor", "CBOR", true),
+    SMILE("smile", "Smile", true),
 
     ;
 
-    public final String id;
-    public final String desc;
+    private final String id;
+    private final String desc;
+    private final boolean isBinary;
 
-    private DataFormat(String n, String d) {
+    private DataFormat(String n, String d, boolean binary) {
         id = n;
         desc = d;
+        isBinary = binary;
     }
 
     public static Map<String, DataFormat> mapping() {
@@ -48,6 +52,10 @@ public enum DataFormat
         return id;
     }
 
+    public boolean isBinaryFormat() {
+        return isBinary;
+    }
+    
     @Override
     public String toString() {
         return desc;
