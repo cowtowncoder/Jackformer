@@ -109,11 +109,11 @@ public class JackformController
                     return ResponseEntity.status(HttpStatus.LENGTH_REQUIRED).build();
                 }
                 fail = jack.checkInput(contentFile, byteLen);
-                String name = contentFile.getName();
+                String name = contentFile.getName().trim();
                 int ix = name.lastIndexOf('.');
                 if (ix >= 0) {
                     name = name.substring(ix);
-                } else if (name.isBlank()) {
+                } else if (name.isEmpty()) {
                     name = "content";
                 }
                 outputName = name + jack.outputFormat().suffix();
