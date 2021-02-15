@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.JavaScriptUtils;
 
 /**
  * Main controller for Jackformation activities.
@@ -24,7 +25,7 @@ public class JackformController
     // Limit input content to 10 megs for now
     private final static long MAX_INPUT_LEN = 10L * 1024 * 1024;
 
-//    private static final Logger LOGGER = LoggerFactory.getLogger(JackformController.class);
+//    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JackformController.class);
 
     // Endpoint for case where content comes as Multi-part data (since it
     // is from a file user selects), output as JSON Object
@@ -150,14 +151,16 @@ public class JackformController
     }
 
     private ResponseEntity<byte[]> _htmlForFail(TransformResponse<?> fail) {
-        String errorMsg = fail.errorMessage;
+        final String errorMsg = fail.errorMessage;
         final String errorType = fail.errorType.toString();
         String html =
 "<html><head><title>Fail: "+errorType+"</title></head>\n"
-+"<body><h1>Fail: "+errorType+"</h1>\n"
-+"<p>"+errorMsg+"</p>"
-+"</body></html>";
++"<body><h3>Fail: "+errorType+"</h3>\n"
++"</body><script>parent.displayTransformFail('"+errorType+"', '"
++JavaScriptUtils.javaScriptEscape(errorMsg)+"');</script>"
++ "</html>";
 
+//        LOGGER.info("Sending HTML of: "+html);
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_TYPE, "text/html;charset=UTF-8")
