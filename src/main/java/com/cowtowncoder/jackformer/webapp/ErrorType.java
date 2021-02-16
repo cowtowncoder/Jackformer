@@ -2,6 +2,8 @@ package com.cowtowncoder.jackformer.webapp;
 
 public enum ErrorType
 {
+    // First server-side types (and 1 pseudo-type) in use
+
     /**
      * Failure due to invalid or incomplete parameters being sent by client
      * (system error).
@@ -23,6 +25,18 @@ public enum ErrorType
     /**
      * No actual error; used instead of {@code null}
      */
-    NONE
+    NONE,
+
+    // And then client-side
+
+    /**
+     * Client-side failure (never set by server side)
+     */
+    SEND_FAILURE,
+
+    /**
+     * Presumed failure due to input content
+     */
+    INVALID_REQUEST,
     ;
 }

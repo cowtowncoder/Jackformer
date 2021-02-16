@@ -147,7 +147,15 @@ function handleTransformResponseOk(resp) {
 }
 
 function handleTransformResponseFail(hdr, textStatus, errorString) {
-  displayTransformFail("Ajax", errorString);
+  // First: if no response header or status, must be send failure
+  if (!hdr || !hdr.status) {
+    var readyState = hdr ? hdr.readyState : -1;
+    displayTransformFail("SEND_FAILURE",
+	    "Failed to send the request (no response header); readyState: "+readyState);
+  } else {
+    // Should we try to include "hdr.status" (or 'textStatus')?
+    displayTransformFail("INVALID_REQUEST", errorString);
+  }
 }
 
 function displayTransformFail(failType, failMessage)
