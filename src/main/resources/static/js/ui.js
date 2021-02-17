@@ -8,6 +8,74 @@ var currentInputText = 0; // 0/1 for empty/non-empty
 var binaryInput = false;
 var binaryOutput = false;
 
+function registerListeners() {
+
+$("#input-format").on("change", function() {
+  var inputFormat = $(this).val();
+  if (currentInputFormat != inputFormat) {
+    currentInputFormat = inputFormat;
+    // Otherwise simple but need to disable text-input for binary input
+    binaryInput = isBinary(inputFormat);
+    if (binaryInput) {
+      $("#input-mode").val("input-mode-file").prop("disabled", true);
+      // will not fire event so update directly:
+      currentInputMode = "input-mode-file";
+    } else {
+      $("#input-mode").prop("disabled", false);
+    }
+    updateUIState();
+  }
+});
+$("#output-format").on("change", function() {
+  var outputFormat = $(this).val();
+  if (currentOutputFormat != outputFormat) {
+    currentOutputFormat = outputFormat;
+    // Otherwise simple but need to disable "transform & show" option
+    binaryOutput = isBinary(outputFormat);
+    if (binaryOutput) {
+      $("#button-show").addClass("hidden");
+    } else {
+      $("#button-show").removeClass("hidden");
+    }
+    updateUIState();
+  }
+});
+$("#input-mode").on("change", function() {
+  var inputMode = $(this).val();
+  if (currentInputMode != inputMode) {
+    currentInputMode = inputMode;
+    updateUIState();
+  }
+});
+$("#input-as-file").on("change", function() {
+  var inputFile = $(this).val();
+  if (currentInputFile != inputFile) {
+    currentInputFile = inputFile;
+    updateUIState();
+  }
+});
+// Textareas are tricky. 'Change' only triggers on losing focus so need
+// to also do "keyup" it seems
+var inputAsText = $("#input-as-text");
+var inputAsTextFunc = function() {
+  var inputStr = $(this).val();
+  var inputText = Math.min(inputStr.length, 1);
+  if (currentInputText != inputText) {
+    currentInputText = inputText;
+    updateUIState();
+  }
+};
+inputAsText.on("change", inputAsTextFunc);
+inputAsText.on("keyup", inputAsTextFunc);
+
+// Second: invoking transformations: one is longer via ajax; another simple submit
+$("#button-show").click(actionTransformAndShow);
+$("#button-download").click(function() {
+  $("#form-input").submit();
+});
+
+}
+
 function updateUIState() {
   if (currentInputFormat) { // got valid input format choice
     showRow("input-format");
@@ -116,7 +184,6 @@ function actionTransformFromInputText() {
 
   // clean output first:
   $("#output-content").val("");
-  $("#output-status-message").text("Sending...");
   // $.getJSON is a fail, alas, wrt Content-Type missing etc so
   var result = $.ajax({
   	url : url,
@@ -137,7 +204,6 @@ function handleTransformResponseOk(resp) {
   // OK only means that call succeeded; not necessarily that the
   // transformation did...
   if (resp.ok) {
-    $("#output-status-message").text("OK");
     $("#output-content").val(resp.transformed);
     showRow("output-content");
   } else {
@@ -162,10 +228,11 @@ function displayTransformFail(failType, failMessage)
 {
   if (!failType) failType = "UNKNOWN";
   if (!failMessage) failMessage = "N/A"
-  $("#output-status-message").html(
-"<table><tr><th colspan='2'>FAIL!</b></th></tr>\n"
-+"<tr><td>Type:</td><td>"+failType+"</td></tr>\n"
-+"<tr><td>Message:</td><td>"+failMessage+"</td><tr>\n"
-);
+
   hideRow("output-content");
+
+  $("#output-error-type").text(failType);
+  $("#output-error-msg").text(failMessage);
+
+  $("#output-error").dialog("open");
 }

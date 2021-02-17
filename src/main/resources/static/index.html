@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="en">
-  <head><title>Jackformer!</title>
+<head><title>Jackformer!</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
 <link rel='stylesheet' type='text/css' href='css/style_2021_02_08.css'>
+<link href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet"/>
 <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  </head>
+<script src="http://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
   <body>
     <h1>Jackformer - the Transformative Tool</h1>
 <table><tr><td>
@@ -64,15 +66,11 @@
 </form>
 </td></tr></table>
 
-<table><tr><td>
+<table id="output-table"><tr><td>
 <form id="outputForm">
  <table class="outputTable">
-  <tr id="output-status-row" class="shown">
-<td class="label">Status: </td>
-<td><span id="output-status-message"> </span></td>
-  </tr>
   <tr id="output-content-row" class="hidden collapsed">
-<td class="label">Transformed Content: </td>
+<td class="label">Transformed: </td>
 <td><textarea id="output-content" class="outputText" rows="12" cols="80"></textarea></td>
   </tr>
  </table>  
@@ -83,74 +81,27 @@
 <iframe name="output-content-frame" style="visibility:hidden;display:none;">
 </iframe>
 
+<!-- and then dialog for error messages -->
+<!-- style="display:none"  -->
+<div id="output-error" title="Transform Error">
+<table>
+<tr><td>Failure&nbsp;type:</td><td id="output-error-type" class="ui-state-error-text"> </td></tr>
+<tr><td>Message:</td><td id="output-error-msg"> </td><tr>
+</table>
+</div>
+
 <script src="js/ui.js">
 </script>
 
 <script>
+registerListeners();
 
-// First: listeners for input control changes
-$("#input-format").on("change", function() {
-  var inputFormat = $(this).val();
-  if (currentInputFormat != inputFormat) {
-    currentInputFormat = inputFormat;
-    // Otherwise simple but need to disable text-input for binary input
-    binaryInput = isBinary(inputFormat);
-    if (binaryInput) {
-      $("#input-mode").val("input-mode-file").prop("disabled", true);
-      // will not fire event so update directly:
-      currentInputMode = "input-mode-file";
-    } else {
-      $("#input-mode").prop("disabled", false);
-    }
-    updateUIState();
-  }
-});
-$("#output-format").on("change", function() {
-  var outputFormat = $(this).val();
-  if (currentOutputFormat != outputFormat) {
-    currentOutputFormat = outputFormat;
-    // Otherwise simple but need to disable "transform & show" option
-    binaryOutput = isBinary(outputFormat);
-    if (binaryOutput) {
-      $("#button-show").addClass("hidden");
-    } else {
-      $("#button-show").removeClass("hidden");
-    }
-    updateUIState();
-  }
-});
-$("#input-mode").on("change", function() {
-  var inputMode = $(this).val();
-  if (currentInputMode != inputMode) {
-    currentInputMode = inputMode;
-    updateUIState();
-  }
-});
-$("#input-as-file").on("change", function() {
-  var inputFile = $(this).val();
-  if (currentInputFile != inputFile) {
-    currentInputFile = inputFile;
-    updateUIState();
-  }
-});
-// Textareas are tricky. 'Change' only triggers on losing focus so need
-// to also do "keyup" it seems
-var inputAsText = $("#input-as-text");
-var inputAsTextFunc = function() {
-  var inputStr = $(this).val();
-  var inputText = Math.min(inputStr.length, 1);
-  if (currentInputText != inputText) {
-    currentInputText = inputText;
-    updateUIState();
-  }
-};
-inputAsText.on("change", inputAsTextFunc);
-inputAsText.on("keyup", inputAsTextFunc);
-
-// Second: invoking transformations: one is longer via ajax; another simplee submit
-$("#button-show").click(actionTransformAndShow);
-$("#button-download").click(function() {
-  $("#form-input").submit();
+$("#output-error").dialog({
+  autoOpen: false,
+  classes: { "ui-dialog": "ui-state-error" },
+  modal: true,
+  width: 500,
+  buttons: { OK: function() {$(this).dialog("close");} }
 });
 
 // Finally, activate the input format selector directly:

@@ -32,6 +32,7 @@ tr {
   border-width: 1px;
   border-color: #080;
   border-style: dotted;
+  vertical-align: top;
 }
 
 td {
