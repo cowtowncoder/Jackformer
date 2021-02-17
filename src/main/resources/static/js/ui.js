@@ -217,7 +217,7 @@ function handleTransformResponseFail(hdr, textStatus, errorString) {
   if (!hdr || !hdr.status) {
     var readyState = hdr ? hdr.readyState : -1;
     displayTransformFail("SEND_FAILURE",
-	    "Failed to send the request (no response header); readyState: "+readyState);
+"Failed to send the request (no response header) -- server down? (readyState: "+readyState+")");
   } else {
     // Should we try to include "hdr.status" (or 'textStatus')?
     displayTransformFail("INVALID_REQUEST", errorString);
