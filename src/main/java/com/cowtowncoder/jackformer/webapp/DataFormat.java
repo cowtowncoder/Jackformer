@@ -12,6 +12,7 @@ public enum DataFormat
 {
     // First textual
 
+    ION_TEXTUAL("ion-text", "Ion-text", false),
     JSON("json", "JSON", false),
     PROPERTIES("properties", "Properties", false),
     XML("xml", "XML", false),
@@ -20,6 +21,7 @@ public enum DataFormat
     // then binary
     BSON("bson", "BSON", true),
     CBOR("cbor", "CBOR", true),
+    ION_BINARY("ion-binary", "Ion-binary", true),
     MSGPACK("msgpack", "MsgPack", true),
     SMILE("smile", "Smile", true),
 

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import com.fasterxml.jackson.dataformat.ion.IonFactory;
+import com.fasterxml.jackson.dataformat.ion.IonObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
@@ -41,6 +43,10 @@ public final class Jacksons
             return BSONWrapper.mapper();
         case CBOR:
             return CBORWrapper.mapper();
+        case ION_BINARY:
+            return IonWrapper.mapperForBinary();
+        case ION_TEXTUAL:
+            return IonWrapper.mapperForTextual();
         case JSON:
             return JSON_MAPPER;
         case MSGPACK:
@@ -68,6 +74,18 @@ public final class Jacksons
         private final static ObjectMapper wrapped = CBORMapper.builder().build();
 
         public static ObjectMapper mapper() { return wrapped; }
+    }
+
+    static class IonWrapper {
+        private final static IonObjectMapper wrappedBinary = IonObjectMapper.builder(
+                IonFactory.forBinaryWriters())
+                .build();
+        private final static IonObjectMapper wrappedTextual = IonObjectMapper.builder(
+                IonFactory.forTextualWriters())
+                .build();
+
+        public static ObjectMapper mapperForBinary() { return wrappedBinary; }
+        public static ObjectMapper mapperForTextual() { return wrappedTextual; }
     }
 
     static class MsgPackWrapper {

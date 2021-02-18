@@ -128,6 +128,7 @@ function isBinary(formatId) {
   switch (formatId) {
   case "bson":
   case "cbor":
+  case "ion-binary":
   case "msgpack":
   case "smile":
   	return true;
