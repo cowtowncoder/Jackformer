@@ -57,11 +57,15 @@
 		</dependency>
 
           <!-- Spring provides for jackson core pieces but we also need non-JSON
-               format support so...
+               format support. First, applicable standard Fasterxml modules
             -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-cbor</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-ion</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -79,6 +83,20 @@
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
+          <!-- And then 3rd party ones
+            -->
+		<dependency>
+			<groupId>de.undercouch</groupId>
+			<artifactId>bson4jackson</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.msgpack</groupId>
+			<artifactId>jackson-dataformat-msgpack</artifactId>
+			<version>0.8.22</version>
+		</dependency>
+
+          <!-- Test dependencies -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

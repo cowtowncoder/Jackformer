@@ -1,14 +1,25 @@
 package com.cowtowncoder.jackformer.webapp;
 
+import org.msgpack.jackson.dataformat.MessagePackFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
 import com.fasterxml.jackson.dataformat.smile.databind.SmileMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
+import de.undercouch.bson4jackson.BsonFactory;
+
+/**
+ * Helper class used to access various format backends for Jackson transformations.
+ * Uses lazy loading of instances via wrapper classes to reduce need to 
+ * load everything upfront (may or may not matter performance-wise)
+ */
 public final class Jacksons
 {
     // We'll construct vanilla mapper eagerly, as that is always needed anyway,
@@ -26,10 +37,14 @@ public final class Jacksons
     public static ObjectMapper mapperFor(DataFormat f)
     {
         switch (f) {
+        case BSON:
+            return BSONWrapper.mapper();
         case CBOR:
             return CBORWrapper.mapper();
         case JSON:
             return JSON_MAPPER;
+        case MSGPACK:
+            return MsgPackWrapper.mapper();
         case PROPERTIES:
             return PropertiesWrapper.mapper();
         case SMILE:
@@ -43,8 +58,20 @@ public final class Jacksons
         }
     }
 
+    static class BSONWrapper {
+        private final static ObjectMapper wrapped = new ObjectMapper(new BsonFactory());
+
+        public static ObjectMapper mapper() { return wrapped; }
+    }
+
     static class CBORWrapper {
         private final static ObjectMapper wrapped = CBORMapper.builder().build();
+
+        public static ObjectMapper mapper() { return wrapped; }
+    }
+
+    static class MsgPackWrapper {
+        private final static ObjectMapper wrapped = new ObjectMapper(new MessagePackFactory());
 
         public static ObjectMapper mapper() { return wrapped; }
     }
@@ -56,7 +83,14 @@ public final class Jacksons
     }
 
     static class SmileWrapper {
-        private final static ObjectMapper wrapped = SmileMapper.builder().build();
+        // Optimize for size: enable shared string value back-refs; disable 7-bit
+        // binary encoding (embed as raw binary)
+        private final static ObjectMapper wrapped = SmileMapper.builder(
+                SmileFactory.builder()
+                    .enable(SmileGenerator.Feature.CHECK_SHARED_STRING_VALUES)
+                    .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
+                    .build()
+        ).build();
 
         public static ObjectMapper mapper() { return wrapped; }
     }

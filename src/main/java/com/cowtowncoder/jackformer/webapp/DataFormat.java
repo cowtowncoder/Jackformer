@@ -18,7 +18,9 @@ public enum DataFormat
     YAML("yaml", "YAML", false),
 
     // then binary
+    BSON("bson", "BSON", true),
     CBOR("cbor", "CBOR", true),
+    MSGPACK("msgpack", "MsgPack", true),
     SMILE("smile", "Smile", true),
 
     ;

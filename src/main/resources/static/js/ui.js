@@ -125,14 +125,24 @@ function updateUIStateByInputMode() {
 }
 
 function isBinary(formatId) {
-  return formatId == "smile" || formatId == "cbor";
+  switch (formatId) {
+  case "bson":
+  case "cbor":
+  case "msgpack":
+  case "smile":
+  	return true;
+  }
+  return false;
 }
+
 function hideRow(rowId) {
   $("#"+rowId+"-row").removeClass("shown active").addClass("hidden");
 }
+
 function showRow(rowId) {
   $("#"+rowId+"-row").removeClass("hidden active").addClass("shown");
 }
+
 function activateRow(idBase) {
   // activate row via class; put focus on selector
   $("#"+idBase+"-row").removeClass("hidden shown").addClass("active");
