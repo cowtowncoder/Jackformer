@@ -6,11 +6,11 @@ Web app for flexible data transforms.
 
 To build locally, use Maven, then run as [Spring Boot](https://spring.io/projects/spring-boot) app:
 
-    mvn clean spring-boot:run
+    ./mvnw clean spring-boot:run
 
 and the default app will be available on localhost port 9090.
 
-Alternatively there is rudimentary `Dockerfile` to use after Maven build (`mvn clean package`)
+Alternatively there is rudimentary `Dockerfile` to use after Maven build (`./mvnw clean package`)
 for something like:
 
     docker build -t mydockerhubrepo/jackformer .
