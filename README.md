@@ -24,7 +24,7 @@ Support for these formats will likely be added in near future.
 
 Textual:
 
-* [Ion](https://en.wikipedia.org/wiki/Ion_(serialization_format) (textual)
+* [Ion](https://en.wikipedia.org/wiki/Ion_(serialization_format)) (textual)
 * [JSON](https://en.wikipedia.org/wiki/JSON)
 * [(Java) Properties](https://en.wikipedia.org/wiki/.properties)
 * [XML](https://en.wikipedia.org/wiki/XML)
