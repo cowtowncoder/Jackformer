@@ -11,62 +11,45 @@ var binaryOutput = false;
 function registerListeners() {
 
 $("#input-format").on("change", function() {
-  var inputFormat = $(this).val();
-  if (currentInputFormat != inputFormat) {
-    currentInputFormat = inputFormat;
-    // Otherwise simple but need to disable text-input for binary input
-    binaryInput = isBinary(inputFormat);
-    if (binaryInput) {
-      $("#input-mode").val("input-mode-file").prop("disabled", true);
-      // will not fire event so update directly:
-      currentInputMode = "input-mode-file";
-    } else {
-      $("#input-mode").prop("disabled", false);
-    }
-    updateUIState();
+  currentInputFormat = $(this).val();
+  binaryInput = isBinary(currentInputFormat);
+  if (binaryInput) {
+    $("#input-mode").val("input-mode-file").prop("disabled", true);
+    // will not fire event so update directly:
+    currentInputMode = "input-mode-file";
+  } else {
+    $("#input-mode").prop("disabled", false);
   }
+  updateUIState();
 });
 $("#output-format").on("change", function() {
-  var outputFormat = $(this).val();
-  if (currentOutputFormat != outputFormat) {
-    currentOutputFormat = outputFormat;
-    // Otherwise simple but need to disable "transform & show" option
-    binaryOutput = isBinary(outputFormat);
-    if (binaryOutput) {
-      $("#button-show").addClass("hidden");
-    } else {
-      $("#button-show").removeClass("hidden");
-    }
-    updateUIState();
+  currentOutputFormat = $(this).val();
+  binaryOutput = isBinary(currentOutputFormat);
+  if (binaryOutput) {
+    $("#button-show").addClass("hidden");
+  } else {
+    $("#button-show").removeClass("hidden");
   }
+  updateUIState();
 });
 $("#input-mode").on("change", function() {
-  var inputMode = $(this).val();
-  if (currentInputMode != inputMode) {
-    currentInputMode = inputMode;
-    updateUIState();
-  }
+  currentInputMode = $(this).val();
+  updateUIState();
 });
 $("#input-as-file").on("change", function() {
-  var inputFile = $(this).val();
-  if (currentInputFile != inputFile) {
-    currentInputFile = inputFile;
-    updateUIState();
-  }
+  currentInputFile = $(this).val();
+  updateUIState();
 });
 // Textareas are tricky. 'Change' only triggers on losing focus so need
 // to also do "keyup" it seems
-var inputAsText = $("#input-as-text");
-var inputAsTextFunc = function() {
+$("#input-as-text").on("change keyup", function() {
   var inputStr = $(this).val();
   var inputText = Math.min(inputStr.length, 1);
   if (currentInputText != inputText) {
     currentInputText = inputText;
     updateUIState();
   }
-};
-inputAsText.on("change", inputAsTextFunc);
-inputAsText.on("keyup", inputAsTextFunc);
+});
 
 // Second: invoking transformations: one is longer via ajax; another simple submit
 $("#button-show").click(actionTransformAndShow);

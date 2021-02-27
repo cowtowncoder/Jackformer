@@ -105,18 +105,19 @@
 </script>
 
 <script>
-registerListeners();
+$(function() {
+ registerListeners();
 
-$("#output-error").dialog({
+ $("#output-error").dialog({
   autoOpen: false,
   classes: { "ui-dialog": "ui-state-error" },
   modal: true,
   width: 500,
   buttons: { OK: function() {$(this).dialog("close");} }
+ });
+ // Finally, activate the input format selector directly:
+ $("#input-format").focus();
 });
-
-// Finally, activate the input format selector directly:
-$("#input-format").focus();
 </script>
 
   </body>
