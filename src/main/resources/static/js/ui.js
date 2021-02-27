@@ -119,20 +119,6 @@ function isBinary(formatId) {
   return false;
 }
 
-function hideRow(rowId) {
-  $("#"+rowId+"-row").removeClass("shown active").addClass("hidden");
-}
-
-function showRow(rowId) {
-  $("#"+rowId+"-row").removeClass("hidden active").addClass("shown");
-}
-
-function activateRow(idBase) {
-  // activate row via class; put focus on selector
-  $("#"+idBase+"-row").removeClass("hidden shown").addClass("active");
-  $("#"+idBase).focus();
-}
-
 function actionTransformAndShow() {
   // First: which mode is user expecting? Submission methods vary a lot
   if (currentInputMode == "input-mode-file") {
@@ -198,8 +184,10 @@ function handleTransformResponseOk(resp) {
   // OK only means that call succeeded; not necessarily that the
   // transformation did...
   if (resp.ok) {
-    $("#output-content").val(resp.transformed);
+    var contentArea = $("#output-content");
+    contentArea.hide().val(resp.transformed);
     showRow("output-content");
+    contentArea.fadeIn(1000);
   } else {
     displayTransformFail(resp.errorType, resp.errorMessage);
     hideRow("output-content");
@@ -229,4 +217,18 @@ function displayTransformFail(failType, failMessage)
   $("#output-error-msg").text(failMessage);
 
   $("#output-error").dialog("open");
+}
+
+function hideRow(rowId) {
+  return $("#"+rowId+"-row").removeClass("shown active").addClass("hidden");
+}
+
+function showRow(rowId) {
+  return $("#"+rowId+"-row").removeClass("hidden active").addClass("shown");
+}
+
+function activateRow(idBase) {
+  // activate row via class; put focus on selector
+  $("#"+idBase+"-row").removeClass("hidden shown").addClass("active");
+  $("#"+idBase).focus();
 }
