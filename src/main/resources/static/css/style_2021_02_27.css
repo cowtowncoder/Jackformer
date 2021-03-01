@@ -1,5 +1,5 @@
 body {
-  background-color: #FFF;
+  background-color: #DFC;
   background-image: url('../img/background-lime.gif');
   /* slight greenish tilt to black to go with background */
   color: #020; 
@@ -45,6 +45,25 @@ td {
 td.label {
   width: 150px;
 }
+
+/* Overriding jquery-ui tab styling */
+
+#jacktabs .ui-tabs {
+  background: transparent;
+}
+
+#jacktabs .ui-tabs-nav {
+  padding-left: 0px;
+  background-color: #EFD;
+  border-width: 0px 0px 1px 0px;
+} 
+
+#jacktabs .ui-tabs-panel { 
+  background-color: #EFD;
+  border-width: 0px 1px 1px 1px; 
+}
+
+/* Trying to restyle jquery-ui error dialog */
 
 /* Some interactivity via https://www.w3schools.com/howto/howto_css_animate_buttons.asp */
 .button {
@@ -155,43 +174,4 @@ tr.dataRow > td {
   border-color: black;
   padding: 1px;
   margin: 0px;
-}
-	
-.nowrap {
-  white-space: nowrap;
-}
-
-.edgeTop {
-   border-width: 2px;
-   border-style: dotted none none none;
-}
-.edgeTopLeft {
-   border-width: 2px;
-   border-style: dotted none none dotted;
-}
-.edgeTopRight {
-   border-width: 2px;
-   border-style: dotted dotted none none;
-}
-
-.edgeLeft {
-   border-width: 2px;
-   border-style: none none none dotted;
-}
-.edgeRight {
-   border-width: 2px;
-   border-style: none dotted none none;
-}
-
-.edgeBottom {
-   border-width: 2px;
-   border-style: none none dotted none;
-}
-.edgeBottomLeft {
-   border-width: 2px;
-   border-style: none none dotted dotted;
-}
-.edgeBottomRight {
-   border-width: 2px;
-   border-style: none dotted dotted none;
 }

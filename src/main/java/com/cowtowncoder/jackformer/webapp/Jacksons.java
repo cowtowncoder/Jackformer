@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.ion.IonFactory;
 import com.fasterxml.jackson.dataformat.ion.IonObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
@@ -41,6 +42,8 @@ public final class Jacksons
         switch (f) {
         case BSON:
             return BSONWrapper.mapper();
+        case CSV: // usually not accessed through this method but...
+            return csvMapper();
         case CBOR:
             return CBORWrapper.mapper();
         case ION_BINARY:
@@ -64,6 +67,11 @@ public final class Jacksons
         }
     }
 
+    public static CsvMapper csvMapper()
+    {
+        return CSVWrapper.mapper();
+    }
+
     static class BSONWrapper {
         private final static ObjectMapper wrapped = new ObjectMapper(new BsonFactory());
 
@@ -74,6 +82,13 @@ public final class Jacksons
         private final static ObjectMapper wrapped = CBORMapper.builder().build();
 
         public static ObjectMapper mapper() { return wrapped; }
+    }
+
+    static class CSVWrapper {
+        // Note: need to keep full type to generate CsvSchema as necessary
+        private final static CsvMapper wrapped = CsvMapper.builder().build();
+
+        public static CsvMapper mapper() { return wrapped; }
     }
 
     static class IonWrapper {

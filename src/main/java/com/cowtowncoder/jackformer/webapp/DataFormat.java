@@ -12,6 +12,7 @@ public enum DataFormat
 {
     // First textual
 
+    CSV("csv", "CSV", false),
     ION_TEXTUAL("ion-text", "Ion-text", false),
     JSON("json", "JSON", false),
     PROPERTIES("properties", "Properties", false),

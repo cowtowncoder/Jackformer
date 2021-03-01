@@ -1,18 +1,23 @@
 package com.cowtowncoder.jackformer.webapp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * Helper class that encapsulates innermost read-in/read-out transformation
  * handling.
  */
-class LoJack
+class TransformBuddy
 {
     private final String PRETTY_SUFFIX = "-pretty";
 
@@ -26,12 +31,28 @@ class LoJack
     private final DataFormat _inputFormat, _outputFormat;
     private final boolean _pretty;
 
+    /**
+     * Input if it comes from byte source
+     */
     private byte[] _inputBytes;
+
+    /**
+     * Input if it comes as a String
+     */
     private String _inputString;
 
-    private Object _intemediate;
-    
-    LoJack(long maxInputLength, String inputFormatId, String outputFormatId)
+    /**
+     * Intermediate representation for content read.
+     */
+    private Object _intermediate;
+
+    /*
+    /**********************************************************************
+    /* Life cycle, simple accessors
+    /**********************************************************************
+     */
+
+    TransformBuddy(long maxInputLength, String inputFormatId, String outputFormatId)
     {
         _maxInputLength = maxInputLength;
         _inputFormatId = inputFormatId;
@@ -44,13 +65,19 @@ class LoJack
         _outputFormat = _formats.get(outputFormatId);
     }
 
-    public static LoJack create(long maxInputLength,
+    public static TransformBuddy create(long maxInputLength,
             String inputFormatId, String outputFormatId) {
-        return new LoJack(maxInputLength, inputFormatId, outputFormatId);
+        return new TransformBuddy(maxInputLength, inputFormatId, outputFormatId);
     }
 
     public DataFormat inputFormat() { return _inputFormat; }
     public DataFormat outputFormat() { return _outputFormat; }
+
+    /*
+    /**********************************************************************
+    /* Public API: validation
+    /**********************************************************************
+     */
 
     public <T> TransformResponse<T> checkFormats() {
         if (_inputFormat == null) {
@@ -90,11 +117,16 @@ class LoJack
 
     public <T> TransformResponse<T> readContents() {
         try {
-            final ObjectMapper mapper = Jacksons.mapperFor(_inputFormat);
-            if (_inputBytes != null) {
-                _intemediate = mapper.readTree(_inputBytes);
+            // 28-Feb-2021, tatu: CSV requires some additional magic
+            if (_inputFormat == DataFormat.CSV) {
+                _intermediate = _readCSVContents();
             } else {
-                _intemediate = mapper.readTree(_inputString);
+                final ObjectMapper mapper = Jacksons.mapperFor(_inputFormat);
+                if (_inputBytes != null) {
+                    _intermediate = mapper.readTree(_inputBytes);
+                } else {
+                    _intermediate = mapper.readTree(_inputString);
+                }
             }
             return null;
         } catch (Exception e) {
@@ -106,7 +138,7 @@ class LoJack
 
     public TransformResponse<String> transformAsStringResponse() {
         try {
-            return TransformResponse.success(_writer().writeValueAsString(_intemediate));
+            return TransformResponse.success(_writer().writeValueAsString(_intermediate));
         } catch (Exception e) {
             return TransformResponse.transformationFail(String.format(
 "Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
@@ -117,7 +149,7 @@ e.getClass().getName(), e.getMessage()));
 
     public TransformResponse<byte[]> transformAsByteResponse() {
         try {
-            return TransformResponse.success(_writer().writeValueAsBytes(_intemediate));
+            return TransformResponse.success(_writer().writeValueAsBytes(_intermediate));
         } catch (Exception e) {
             return TransformResponse.transformationFail(String.format(
 "Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
@@ -125,6 +157,53 @@ _outputFormat, _inputFormat,
 e.getClass().getName(), e.getMessage()));
         }
     }
+
+    /*
+    /**********************************************************************
+    /* Helper methods for specialized reading/writing for some formats
+    /**********************************************************************
+     */
+
+    // CSV is columnar/tabular format and we may want to configure aspects
+    // bit differently...
+    private Object _readCSVContents() throws Exception
+    {
+        CsvMapper mapper = Jacksons.csvMapper();
+        // 28-Feb-2021, tatu: The first version here will simply assume/require
+        //   that the first line is header and read as Array of Objects, basically.
+        //   We may want to improve logics with heuristics in near future, depending
+        //   on whether it seems useful (f.ex single-line input case)
+        ArrayList<Object> entries = new ArrayList<>();
+        ObjectReader r = mapper.readerFor(Map.class)
+                .with(CsvSchema.emptySchema().withHeader());
+
+        // Let possible initial exception be thrown here:
+        final MappingIterator<Map<String,String>> it0 = (_inputBytes != null)
+                ? r.readValues(_inputBytes)
+                : r.readValues(_inputString)
+                ;
+
+        // But then iterate over rows:
+        try (MappingIterator<Map<String,String>> it = it0) {
+            try {
+                while (it.hasNextValue()) {
+                    entries.add(it.nextValue());
+                }
+            } catch (IOException e) {
+                throw new IOException(String.format(
+    "Failed to read data row #%d of CSV content, problem: (%s) %s",
+    entries.size()+1, e.getClass().getName(), e.getMessage()));
+            }
+        }
+
+        return entries;
+    }
+
+    /*
+    /**********************************************************************
+    /* Low-level helper methods
+    /**********************************************************************
+     */
 
     private ObjectWriter _writer() {
         ObjectWriter w = Jacksons.writerFor(_outputFormat, _pretty);

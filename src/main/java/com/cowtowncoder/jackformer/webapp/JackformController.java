@@ -42,7 +42,7 @@ public class JackformController
         if ((contentFile == null) || (byteLen = contentFile.getSize()) <= 0L) {
             return TransformResponse.validationFail("Missing File input \"inputContent\"");
         }
-        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        TransformBuddy jack = TransformBuddy.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
         TransformResponse<String> fail;
 
         if ((fail = jack.checkFormats()) != null) {
@@ -69,7 +69,7 @@ public class JackformController
             // and safer wrt character encoding
             @RequestBody byte[] inputContent
     ) {
-        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        TransformBuddy jack = TransformBuddy.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
         TransformResponse<String> fail;
         if ((fail = jack.checkFormats()) != null) {
             return fail;
@@ -95,7 +95,7 @@ public class JackformController
             @RequestParam(value="inputText", defaultValue="") String contentText,
             @RequestPart(value="inputFile", required=false) MultipartFile contentFile
     ) {
-        LoJack jack = LoJack.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
+        TransformBuddy jack = TransformBuddy.create(MAX_INPUT_LEN, inputFormatId, outputFormatId);
         TransformResponse<byte[]> fail;
         if ((fail = jack.checkFormats()) != null) {
             return _htmlForFail(fail);

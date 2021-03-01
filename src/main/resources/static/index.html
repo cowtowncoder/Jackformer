@@ -2,14 +2,19 @@
 <html lang="en">
 <head><title>Jackformer!</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
-<link rel='stylesheet' type='text/css' href='css/style_2021_02_08.css'>
+<link rel='stylesheet' type='text/css' href='css/style_2021_02_27.css'>
 <link href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet"/>
 <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
   <body>
     <h1>Jackformer - the Transformative Tool</h1>
-<table><tr><td>
+<div id="jacktabs">
+  <ul>
+<li><a href="#tab-transform">Transform!</a></li>
+<li><a href="#tab-about">About</a></li>
+  </ul>
+<div id="tab-transform">
 <form id="form-input" action="rest/jackform-output-file" method="post" enctype="multipart/form-data"
      target="output-content-frame">
   <table class="inputTable">
@@ -19,6 +24,7 @@
    <option value=""></option>
    <option value="bson">BSON</option>
    <option value="cbor">CBOR</option>
+   <option value="csv">CSV (w/ header)</option>
    <option value="ion-binary">Ion-binary</option>
    <option value="ion-text">Ion-text</option>
    <option value="json">JSON</option>
@@ -75,18 +81,15 @@
    </tr>
   </table>
 </form>
-</td></tr></table>
 
-<table id="output-table"><tr><td>
 <form id="outputForm">
- <table class="outputTable">
+ <table id="output-table" class="outputTable">
   <tr id="output-content-row" class="hidden collapsed">
 <td class="label">Transformed: </td>
 <td><textarea id="output-content" class="outputText" rows="12" cols="80"></textarea></td>
   </tr>
  </table>  
 </form>
-</td></tr></table>
 
 <!-- iframe just as download target -->
 <iframe name="output-content-frame" style="visibility:hidden;display:none;">
@@ -100,6 +103,34 @@
 <tr><td>Message:</td><td id="output-error-msg"> </td><tr>
 </table>
 </div>
+</div><!-- transform tab -->
+<div id="tab-about">
+<h2>About Jackform</h2>
+
+<p>
+Jackform is a simple transformation tool, consisting of a backing web app and
+small Javascript user interface.
+<p>
+Transformation backend is based on <a href="https://github.com/FasterXML/jackson/"
+target="_blank">Jackson</a> library and exposes most of dataformats supported by
+various Jackson dataformat modules.
+<p>
+
+<h2>About Author</h2>
+
+Jackform was written by Tatu Saloranta (tatu.saloranta@iki.fi, aka
+<a href="https://twitter.com/cowtowncoder">@cowtowncoder</a>)
+who is also the lead
+developer of Jackson library, as well as many other Open Source Java libraries.
+
+<h2>Legal stuff</h2>
+
+Jackform is &copy; (2021-) by Tatu Saloranta. It is licensed under
+<a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.
+
+You can get Jackformer source code from its <a href="https://github.com/cowtowncoder/Jackformer">Github repository</a>.
+
+</div">
 
 <script src="js/ui.js">
 </script>
@@ -110,13 +141,15 @@ $(function() {
 
  $("#output-error").dialog({
   autoOpen: false,
-  classes: { "ui-dialog": "ui-state-error" },
+// see https://api.jqueryui.com/theming/css-framework/ for options:
+  classes: { "ui-dialog-titlebar": "ui-state-error" },
   modal: true,
   width: 500,
   buttons: { OK: function() {$(this).dialog("close");} }
  });
  // Finally, activate the input format selector directly:
  $("#input-format").focus();
+ $("#jacktabs").tabs();
 });
 </script>
 
