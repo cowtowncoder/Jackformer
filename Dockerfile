@@ -7,8 +7,12 @@
 #
 # and then
 #
-# docker build -t cowtowncoder/jackformer .
-# docker run -p 9090:9090 cowtowncoder/jackformer
+# docker build -t [DOCKER-REPO]/jackformer-webapp .
+# docker run -p 9090:9090 [DOCKER-REPO]/jackformer-webapp
+#
+# Note, however, that the better way to build the image is to just run:
+#
+# ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=[DOCKER-REPO]/jackformer-webapp
 
 FROM openjdk:8-jdk-alpine
 RUN addgroup -S jack && adduser -S jack -G jack
