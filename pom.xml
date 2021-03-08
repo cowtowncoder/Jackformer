@@ -112,17 +112,47 @@
     </dependency>
   </dependencies>
 
+  <!-- 07-Mar-2021, tatu: Playing with a few alternative Docker/OCI image
+      creation mechanisms since there are multiple and I don't have enough
+      experience to evaluate which works best for me, yet:
+
+      (1) There is Dockerfile, for out-of-Maven building. Not in use
+      (2) Spring Boot Maven Plug-in has its "spring-boot:build-image"
+         (see https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/htmlsingle/)
+      (3) Jib also has a plug-in, which some consider the best approach
+         (see https://ashishtechmill.com/containerizing-spring-boot-application-with-jib)
+    -->
   <build>
     <plugins>
+      <!--  So, (2) SB Maven Plugin can do it: -->
       <plugin>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-maven-plugin</artifactId>
-	<!-- Customize name to inject version -->
-	<configuration>
-	  <image>
-	    <name>cowtowncoder/${project.artifactId}:${project.version}</name>
-	  </image>
-	</configuration>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <!-- Customize name to inject version -->
+        <configuration>
+          <mainClass>com.cowtowncoder.jackformer.webapp.JackformerApp</mainClass>
+          <image>
+            <name>cowtowncoder/${project.artifactId}:${project.version}</name>
+            <publish>false</publish>
+          </image>
+        </configuration>
+      </plugin>
+      <!--  And so does (3), Jib -->
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>2.8.0</version>
+        <configuration>
+          <from>
+            <image>openjdk:8-jdk-alpine</image>
+            <!-- 07-Mar-2021, tatu: Article suggested this for some reason...
+            <image>gcr.io/distroless/java:11</image>
+             -->
+          </from>
+          <to>
+            <image>cowtowncoder/${project.artifactId}:${project.version}</image>
+          </to>
+        </configuration>
       </plugin>
     </plugins>
   </build>
