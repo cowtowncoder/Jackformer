@@ -9,14 +9,14 @@ To build locally, use Maven, then run as [Spring Boot](https://spring.io/project
 
     ./mvnw clean spring-boot:run
 
-and the default app will be available on localhost port 9090.
+and the default app will be available on localhost port 8080.
 
-Alternatively there is rudimentary `Dockerfile` to use after Maven build (`./mvnw clean package`)
-for something like:
+Alternatively you can build a container (Docker) image using one of 2 possible
+Maven targets (see `docker-build.sh` or `jib-build.sh`.
 
-    mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
-    docker build -t mydockerhubrepo/jackformer .
-    docker run -p 9090:9090 mydockerhubrepo/jackformer
+Or you can run a pre-built image from Dockerhub with:
+
+    docker run -p 8080:8080 cowtowncoder/jackformer-webapp:latest
 
 ## Formats supported
 
@@ -26,6 +26,7 @@ Support for these formats will likely be added in near future.
 
 Textual:
 
+* [CSV](https://en.wikipedia.org/wiki/CSV) (input-only for 0.5.0)
 * [Ion](https://en.wikipedia.org/wiki/Ion_(serialization_format)) (textual)
 * [JSON](https://en.wikipedia.org/wiki/JSON)
 * [(Java) Properties](https://en.wikipedia.org/wiki/.properties)
@@ -43,9 +44,37 @@ Binary:
 Note: textual formats can be cut'n pasted as input, and resulted displayed on-page.
 Binary formats require file upload/download. UI will enforce these limitations.
 
+## Notes on Format support
 
+### CSV
 
+As of 0.5.0, CSV input requires use of single "header" line, followed by one or more
+data lines. Separator has to be comma.
+This would be valid input:
 
+```
+name,age
+Bob,29
+Bill,33
+```
 
+Data will be considered to be an Array of Objects, for purposes of transformation: names
+of Object properties coming from the header line, so the example above would be similar to
+YAML contents of:
 
+```yaml
+name: Bob
+---
+- name: "Bob"
+  age: 29
+- name: "Bill"
+  age: 33
+```
+
+As of version 0.5.0, CSV output is not yet supported but should be added in near future.
+
+## Ion (textual)
+
+Pretty-printing is not yet supported for Ion (textual) output, although format
+would support it: this limitation will hopefully be lifted in future.
 
