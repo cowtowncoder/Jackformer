@@ -1,4 +1,3 @@
 #!/bin/bash
 
-docker run --publish 9090:8080 -t cowtowncoder/jackformer-webapp
-
+docker run --publish 8080:8080 -t cowtowncoder/jackformer-webapp
