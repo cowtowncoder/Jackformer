@@ -4,7 +4,6 @@ Web app for flexible data transforms.
 
 ## Build, run
 
-
 To build locally, use Maven, then run as [Spring Boot](https://spring.io/projects/spring-boot) app:
 
     ./mvnw clean spring-boot:run

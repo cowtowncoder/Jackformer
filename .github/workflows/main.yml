@@ -1,16 +1,14 @@
-# Basic build+verify workflow with no publish; only for "master" branch
-
 name: Build and Verify
 on:
   push:
     branches:
-    - master
+    - main
     paths-ignore:
     - "README.md"
     - "release-notes/*"
   pull_request:
     branches:
-    - master
+    - main
     paths-ignore:
     - "README.md"
     - "release-notes/*"
