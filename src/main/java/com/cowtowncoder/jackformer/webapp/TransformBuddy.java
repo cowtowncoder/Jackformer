@@ -6,10 +6,12 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -138,7 +140,8 @@ class TransformBuddy
 
     public TransformResponse<String> transformAsStringResponse() {
         try {
-            return TransformResponse.success(_writer().writeValueAsString(_intermediate));
+            return TransformResponse.success(WriterHelper.of(_outputFormat,
+                    _intermediate, _pretty).asString());
         } catch (Exception e) {
             return TransformResponse.transformationFail(String.format(
 "Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
@@ -149,7 +152,8 @@ e.getClass().getName(), e.getMessage()));
 
     public TransformResponse<byte[]> transformAsByteResponse() {
         try {
-            return TransformResponse.success(_writer().writeValueAsBytes(_intermediate));
+            return TransformResponse.success(WriterHelper.of(_outputFormat,
+                    _intermediate, _pretty).asBytes());
         } catch (Exception e) {
             return TransformResponse.transformationFail(String.format(
 "Failed to generate %s output from provided  \"%s\" content; problem: (%s) %s",
@@ -191,8 +195,8 @@ e.getClass().getName(), e.getMessage()));
                 }
             } catch (IOException e) {
                 throw new IOException(String.format(
-    "Failed to read data row #%d of CSV content, problem: (%s) %s",
-    entries.size()+1, e.getClass().getName(), e.getMessage()));
+"Failed to read data row #%d of CSV content, problem: (%s) %s",
+entries.size()+1, e.getClass().getName(), e.getMessage()));
             }
         }
 
@@ -204,15 +208,6 @@ e.getClass().getName(), e.getMessage()));
     /* Low-level helper methods
     /**********************************************************************
      */
-
-    private ObjectWriter _writer() {
-        ObjectWriter w = Jacksons.writerFor(_outputFormat, _pretty);
-        // and XML has bit of an oddity wrt wrapping
-        if (_outputFormat == DataFormat.XML) {
-            w = w.withRootName("xml");
-        }
-        return w;
-    }
 
     private <T> TransformResponse<T> _checkSize(long byteLen)
     {
@@ -234,5 +229,59 @@ e.getClass().getName(), e.getMessage()));
         }
         double mb = kb / 1024.0;
         return String.format("%.1f MB", mb);
+    }
+
+    /*
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
+     */
+
+    // Helper class that encapsulates output oddities wrt XML
+    static class WriterHelper
+    {
+        final private ObjectWriter _writer;
+        final private Object _valueToWrite;
+
+        private WriterHelper(ObjectWriter w, Object v) {
+            _writer = w;
+            _valueToWrite = v;
+        }
+
+        public String asString() throws IOException {
+            return _writer.writeValueAsString(_valueToWrite);
+        }
+
+        public byte[] asBytes() throws IOException {
+            return _writer.writeValueAsBytes(_valueToWrite);
+        }
+
+        public static WriterHelper of(DataFormat outputFormat, Object valueToWrite,
+                boolean pretty)
+        {
+            ObjectWriter w = Jacksons.writerFor(outputFormat, pretty);
+
+            // XML has bit of an oddity wrt wrapping
+            if (outputFormat == DataFormat.XML) {
+                String rootName = "xml";
+
+                // [#3] Remove "extra" XML root wrapper if possible 
+                // (note: Jackson 2.13 will have a setting to automate this)
+                if (valueToWrite instanceof ObjectNode) {
+                    ObjectNode n = (ObjectNode) valueToWrite;
+                    if (n.size() == 1) {
+                        Map.Entry<String, JsonNode> entry = n.fields().next();
+                        // make sure new root would still be ObjectNode (can't unwrap
+                        // otherwise)
+                        if (entry.getValue() instanceof ObjectNode) {
+                            rootName = entry.getKey();
+                            valueToWrite = entry.getValue();
+                        }
+                    }
+                }
+                w = w.withRootName(rootName);
+            }
+            return new WriterHelper(w, valueToWrite);
+        }
     }
 }
