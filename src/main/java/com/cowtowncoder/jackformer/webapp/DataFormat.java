@@ -16,6 +16,7 @@ public enum DataFormat
     ION_TEXTUAL("ion-text", "Ion-text", false),
     JSON("json", "JSON", false),
     PROPERTIES("properties", "Properties", false),
+    TOML("toml", "TOML", false),
     XML("xml", "XML", false),
     YAML("yaml", "YAML", false),
 

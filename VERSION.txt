@@ -1,0 +1,12 @@
+Project: Jackformer
+
+Simple Web App for interactive automated conversion between dataformats supported
+by Jackson
+
+------------------------------------------------------------------------
+=== Releases ===
+------------------------------------------------------------------------
+
+-- 0.5.1
+
+#1: Add support for TOML format

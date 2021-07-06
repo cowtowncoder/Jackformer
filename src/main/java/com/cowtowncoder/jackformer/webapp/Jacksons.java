@@ -13,6 +13,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
 import com.fasterxml.jackson.dataformat.smile.databind.SmileMapper;
+import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
@@ -58,6 +59,8 @@ public final class Jacksons
             return PropertiesWrapper.mapper();
         case SMILE:
             return SmileWrapper.mapper();
+        case TOML:
+            return TomlWrapper.mapper();
         case XML:
             return XmlWrapper.mapper();
         case YAML:
@@ -124,6 +127,12 @@ public final class Jacksons
                     .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
                     .build()
         ).build();
+
+        public static ObjectMapper mapper() { return wrapped; }
+    }
+
+    static class TomlWrapper {
+        private final static ObjectMapper wrapped = TomlMapper.builder().build();
 
         public static ObjectMapper mapper() { return wrapped; }
     }
