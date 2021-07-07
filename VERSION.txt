@@ -7,6 +7,10 @@ by Jackson
 === Releases ===
 ------------------------------------------------------------------------
 
+-- 0.5.3
+
+#4: Add favicon.ico for webapp
+
 -- 0.5.2 (06-Jul-2021)
 
 #1: Add support for TOML format
