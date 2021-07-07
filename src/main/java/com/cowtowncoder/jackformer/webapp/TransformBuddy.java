@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -271,9 +272,10 @@ entries.size()+1, e.getClass().getName(), e.getMessage()));
                     ObjectNode n = (ObjectNode) valueToWrite;
                     if (n.size() == 1) {
                         Map.Entry<String, JsonNode> entry = n.fields().next();
-                        // make sure new root would still be ObjectNode (can't unwrap
-                        // otherwise)
-                        if (entry.getValue() instanceof ObjectNode) {
+                        // make sure new root would still be ObjectNode or scalar
+                        // -- that is, NOT an ArrayNode (since those cannot be
+                        // unwrapped)
+                        if (!(entry.getValue() instanceof ArrayNode)) {
                             rootName = entry.getKey();
                             valueToWrite = entry.getValue();
                         }
