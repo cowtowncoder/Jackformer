@@ -7,7 +7,7 @@ by Jackson
 === Releases ===
 ------------------------------------------------------------------------
 
--- 0.5.1
+-- 0.5.2 (06-Jul-2021)
 
 #1: Add support for TOML format
 #3: Add workaround to omit root-level XML wrapper (similar to Jackson 2.13 feature)
