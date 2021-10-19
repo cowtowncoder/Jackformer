@@ -168,7 +168,7 @@
           <executions>
             <execution>
               <id>inject-dependency-versions</id>
-              <phase>package</phase>
+              <phase>process-classes</phase>
               <goals>
                 <goal>replace</goal>
               </goals>
