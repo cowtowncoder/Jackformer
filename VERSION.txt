@@ -7,6 +7,10 @@ by Jackson
 === Releases ===
 ------------------------------------------------------------------------
 
+-- 0.5.4  (19-Oct-2021)
+
+- Upgrade to Jackson 2.13.0 dependencies
+
 -- 0.5.3
 
 #4: Add favicon.ico for webapp

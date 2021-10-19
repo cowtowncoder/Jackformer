@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.cowtowncoder.jackformer</groupId>
   <artifactId>jackformer-webapp</artifactId>
-  <version>0.5.3-SNAPSHOT</version>
+  <version>0.5.4-SNAPSHOT</version>
   <name>jackformer-webapp</name>
   <description>Data Transformer Web App</description>
   <licenses>
@@ -35,7 +35,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.12.4</version>
+        <version>2.13.0</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>   
@@ -81,7 +81,7 @@
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-smile</artifactId>
     </dependency>
-    <dependency> <!-- added in 2.12.3! -->
+    <dependency> <!-- added in 2.13 (officially) -->
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-toml</artifactId>
     </dependency>
@@ -104,7 +104,7 @@
     <dependency>
       <groupId>org.msgpack</groupId>
       <artifactId>jackson-dataformat-msgpack</artifactId>
-      <version>0.8.22</version>
+      <version>0.9.0</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -145,7 +145,7 @@
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.1.4</version>
         <configuration>
           <from>
             <image>openjdk:8-jdk-alpine</image>
