@@ -10,7 +10,7 @@
   </parent>
   <groupId>com.cowtowncoder.jackformer</groupId>
   <artifactId>jackformer-webapp</artifactId>
-  <version>0.5.4-SNAPSHOT</version>
+  <version>0.5.5-SNAPSHOT</version>
   <name>jackformer-webapp</name>
   <description>Data Transformer Web App</description>
   <licenses>

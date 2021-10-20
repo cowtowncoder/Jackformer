@@ -10,6 +10,7 @@ by Jackson
 -- 0.5.4  (19-Oct-2021)
 
 - Upgrade to Jackson 2.13.0 dependencies
+- Add version info of Jackformer and Jackson on "About" tab
 
 -- 0.5.3
 

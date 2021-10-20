@@ -1,3 +1,5 @@
 #!/bin/bash
 
-./mvnw clean compile jib:build
+# https://ashishtechmill.com/containerizing-spring-boot-application-with-jib
+
+./mvnw clean package jib:build

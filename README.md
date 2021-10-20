@@ -16,6 +16,7 @@ Maven targets (see `docker-build.sh` or `jib-build.sh`.
 Or you can run a pre-built image from Dockerhub with:
 
     docker run -p 8080:8080 cowtowncoder/jackformer-webapp:latest
+    docker run -p 8080:8080 cowtowncoder/jackformer-webapp:0.5.4
 
 ## Formats supported
 
