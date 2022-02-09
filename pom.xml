@@ -22,13 +22,13 @@
   </licenses>
   <scm>
     <connection>scm:git:git@github.com:cowtowncoder/Jackformer.git</connection>
-    <developerConnection>scm:git:git@github.com:FasterXML/jackson-databind.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:cowtowncoder/Jackformer.git</developerConnection>
     <url>https://github.com/cowtowncoder/Jackformer</url>
     <tag>HEAD</tag>
   </scm>
   <properties>
     <java.version>8</java.version>
-    <jackson.version>2.13.0</jackson.version>
+    <jackson.version>2.13.1</jackson.version>
   </properties>
 
   <dependencyManagement>
